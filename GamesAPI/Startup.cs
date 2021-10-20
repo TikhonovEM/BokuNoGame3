@@ -12,7 +12,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace BokuNoGame3
+namespace GamesAPI
 {
     public class Startup
     {
