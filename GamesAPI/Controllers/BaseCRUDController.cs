@@ -37,7 +37,7 @@ namespace GamesAPI.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Can't add to DB. Exception message: {ex.Message}");
+                Logger.LogError($"Can't add to DB. Exception message: {ex.Message}");
                 return StatusCode(400);
             }
             return StatusCode(200);
