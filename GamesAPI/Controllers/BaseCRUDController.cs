@@ -20,16 +20,14 @@ namespace GamesAPI.Controllers
         protected AppDBContext Context => _context ??= HttpContext.RequestServices.GetService<AppDBContext>();
         protected ILogger<TController> Logger => _logger ??= HttpContext.RequestServices.GetService<ILogger<TController>>();
 
-        // GET api/<GameController>/5
         [HttpGet("{id}")]
-        public async Task<object> Get(int id)
+        public virtual async Task<object> Get(int id)
         {
             return await this.Context.FindAsync<TModel>(id);
         }
 
-        // POST api/<GameController>
         [HttpPost]
-        public async Task<StatusCodeResult> Post([FromBody] TModel model)
+        public virtual async Task<StatusCodeResult> Post([FromBody] TModel model)
         {
             try
             {
@@ -43,15 +41,13 @@ namespace GamesAPI.Controllers
             return StatusCode(200);
         }
 
-        // PUT api/<GameController>/5
         [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
+        public virtual void Put(int id, [FromBody] TModel model)
         {
         }
 
-        // DELETE api/<GameController>/5
         [HttpDelete("{id}")]
-        public async Task<StatusCodeResult> Delete(int id)
+        public virtual async Task<StatusCodeResult> Delete(int id)
         {
             var model = await this.Context.FindAsync<TModel>(id);
             if (model != null)
