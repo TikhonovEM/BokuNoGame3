@@ -12,6 +12,13 @@ namespace GamesAPI.Controllers
     [ApiController]
     public class IntegrationInfoController : BaseCRUDController<IntegrationInfoController, IntegrationInfo>
     {
-
+        [HttpGet("GetAllSystemIds/{descriptor}")]
+        public object GetAllSystemIds(string descriptor)
+        {
+            var ids = Context.IntegrationInfos
+                .Where(ii => ii.ExternalSystemDescriptor.Equals(descriptor))
+                .Select(ii => ii.ExternalGameId);
+            return ids.ToList();
+        }
     }
 }
