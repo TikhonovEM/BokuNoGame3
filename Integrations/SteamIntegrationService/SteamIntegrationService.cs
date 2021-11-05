@@ -60,7 +60,7 @@ namespace Bng.SteamIntegrationService
             var ids = JsonConvert.DeserializeObject<List<int>>(response);
 
             var listResponse = await steamApps.GetAppListAsync();
-            var appInfoList = listResponse.Data.Where(a => !ids.Any(id => id == a.AppId));
+            var appInfoList = listResponse.Data.Where(a => !ids.Any(id => id == a.AppId)).Take(199);
 
             var appsCount = 0;
             var isMaxSizeExists = false;
@@ -162,27 +162,39 @@ namespace Bng.SteamIntegrationService
                     game.Genre = genreValue;
                     game.ReleaseDate = Convert.ToDateTime(appDetail.ReleaseDate.Date);
                     game.AgeRating = appDetail.RequiredAge.ToString();
-                    using var httpClient = new HttpClient();
-                    game.Logo = await httpClient.GetByteArrayAsync(appDetail.HeaderImage);
+                    using (var httpClient = new HttpClient())
+                    {
+                        game.Logo = await httpClient.GetByteArrayAsync(appDetail.HeaderImage);
+                    }
 
-                    httpClient.BaseAddress = new Uri(_baseAddress);
-                    await httpClient.PostAsJsonAsync("Game", game);
-                    _logger.LogInformation($"Created game(Id = {game.Name})");
+                    var gameId = string.Empty;
+                    using (var httpClient = new HttpClient())
+                    {
+                        httpClient.BaseAddress = new Uri(_baseAddress);
+                        var response = httpClient.PostAsJsonAsync("Game", game).GetAwaiter().GetResult();
+                        gameId = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+                        _logger.LogInformation($"Created game(Name = {game.Name})");
+                    }
 
                     var integrationInfo = new IntegrationInfo();
                     integrationInfo.ExternalSystemDescriptor = "Steam";
                     integrationInfo.ExternalGameId = Convert.ToInt32(appDetail.SteamAppId);
-                    integrationInfo.InternalGameId = game.Id;
+                    integrationInfo.InternalGameId = Convert.ToInt32(gameId);
                     integrationInfo.HasErrors = false;
                     integrationInfo.Date = DateTime.Now;
-                    await httpClient.PostAsJsonAsync("IntegrationInfo", integrationInfo);
-                    _logger.LogInformation($"Created integration info(Id = {integrationInfo.InternalGameId})");
+                    using (var httpClient = new HttpClient())
+                    {
+                        httpClient.BaseAddress = new Uri(_baseAddress);
+                        await httpClient.PostAsJsonAsync("IntegrationInfo", integrationInfo);
+                        _logger.LogInformation($"Created integration info(Id = {integrationInfo.InternalGameId})");
+                    }
                 }
                 catch (Exception e)
                 {
                     _logger.LogError(e, "Произошла ошибка при миграции в БД");
                 }
             }
+            _logger.LogInformation("Finish migration to DB");
         }
     }
 }

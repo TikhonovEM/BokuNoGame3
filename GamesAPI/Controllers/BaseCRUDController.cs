@@ -28,7 +28,7 @@ namespace Bng.GamesAPI.Controllers
         }
 
         [HttpPost]
-        public virtual async Task<StatusCodeResult> Post([FromBody] TModel model)
+        public virtual async Task<IActionResult> Post([FromBody] TModel model)
         {
             try
             {
@@ -40,7 +40,8 @@ namespace Bng.GamesAPI.Controllers
                 Logger.LogError($"Can't add to DB. Exception message: {ex.Message}");
                 return StatusCode(400);
             }
-            return StatusCode(200);
+            var idProp = model.GetType().GetProperty("Id");
+            return StatusCode(200, idProp.GetValue(model));
         }
 
         [HttpPut("{id}")]
