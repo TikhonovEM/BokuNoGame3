@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SteamIntegrationService
+namespace Bng.SteamIntegrationService
 {
     public static class ScheduledServiceExtensions
     {

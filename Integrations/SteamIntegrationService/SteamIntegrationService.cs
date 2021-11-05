@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace SteamIntegrationService
+namespace Bng.SteamIntegrationService
 {
     public class SteamIntegrationService : CronJobService
     {

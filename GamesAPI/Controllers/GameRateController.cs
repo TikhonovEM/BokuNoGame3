@@ -1,11 +1,11 @@
-﻿using GamesAPI.Models;
+﻿using Bng.GamesAPI.Models;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace GamesAPI.Controllers
+namespace Bng.GamesAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]

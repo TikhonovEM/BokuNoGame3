@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SteamIntegrationService
+namespace Bng.SteamIntegrationService
 {
     public interface IScheduleConfig<T>
     {

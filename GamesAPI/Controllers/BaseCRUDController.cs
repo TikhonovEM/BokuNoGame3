@@ -1,4 +1,4 @@
-﻿using GamesAPI.Models;
+﻿using Bng.GamesAPI.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
@@ -7,7 +7,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace GamesAPI.Controllers
+namespace Bng.GamesAPI.Controllers
 {
     public abstract class BaseCRUDController<TController, TModel> : ControllerBase 
         where TController : BaseCRUDController<TController, TModel>

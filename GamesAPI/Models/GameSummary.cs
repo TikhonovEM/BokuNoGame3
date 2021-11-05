@@ -3,7 +3,7 @@ using Newtonsoft.Json.Converters;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace GamesAPI.Models
+namespace Bng.GamesAPI.Models
 {
     public class GameSummary
     {
