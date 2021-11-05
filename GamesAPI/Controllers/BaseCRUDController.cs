@@ -33,6 +33,7 @@ namespace Bng.GamesAPI.Controllers
             try
             {
                 await this.Context.AddAsync<TModel>(model);
+                await this.Context.SaveChangesAsync();
             }
             catch (Exception ex)
             {
@@ -53,7 +54,8 @@ namespace Bng.GamesAPI.Controllers
             var model = await this.Context.FindAsync<TModel>(id);
             if (model != null)
             {
-                _context.Remove<TModel>(model);
+                this.Context.Remove<TModel>(model);
+                await this.Context.SaveChangesAsync();
                 return StatusCode(200);
             }
             else
