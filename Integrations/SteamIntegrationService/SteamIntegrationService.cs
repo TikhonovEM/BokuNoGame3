@@ -77,6 +77,7 @@ namespace Bng.SteamIntegrationService
             var lang = "russian";
             foreach (var app in appInfoList)
             {
+                var hasErrors = false;
                 StoreAppDetailsDataModel appDetails = null;
                 try
                 {
@@ -85,19 +86,44 @@ namespace Bng.SteamIntegrationService
                 catch (NullReferenceException)
                 {
                     _logger.LogError("Не удалось получить информацию о приложении {0}({1})", app.Name, app.AppId);
-                    continue;
+                    hasErrors = true;
                 }
                 catch (Exception e)
                 {
                     _logger.LogError(e, "Произошла непредвиденная ошибка: ");
-                    continue;
+                    hasErrors = true;
                 }
+                finally
+                {
+                    if (hasErrors && app?.AppId != default)
+                    {
+                        var integrationInfo = new IntegrationInfo();
+                        integrationInfo.ExternalSystemDescriptor = "Steam";
+                        integrationInfo.ExternalGameId = Convert.ToInt32(app.AppId);
+                        integrationInfo.HasErrors = true;
+                        integrationInfo.Date = DateTime.Now;
+                        await httpClient.PostAsJsonAsync("IntegrationInfo", integrationInfo);
+                        _logger.LogInformation($"Created integration info with errors(AppId = {app.AppId})");
+                    }
+                }
+                if (hasErrors)
+                    continue;
                 // Skip DLC
                 if (appDetails.Type.Equals("game"))
                 {
                     AppDetails.Add(appDetails);
                     if (isMaxSizeExists && AppDetails.Count >= appsCount)
                         break;
+                }
+                else
+                {
+                    var integrationInfo = new IntegrationInfo();
+                    integrationInfo.ExternalSystemDescriptor = "Steam";
+                    integrationInfo.ExternalGameId = Convert.ToInt32(app.AppId);
+                    integrationInfo.HasErrors = true;
+                    integrationInfo.Date = DateTime.Now;
+                    await httpClient.PostAsJsonAsync("IntegrationInfo", integrationInfo);
+                    _logger.LogInformation($"Created integration info with errors(AppId = {app.AppId})");
                 }
             }
         }
@@ -147,6 +173,7 @@ namespace Bng.SteamIntegrationService
                     integrationInfo.ExternalSystemDescriptor = "Steam";
                     integrationInfo.ExternalGameId = Convert.ToInt32(appDetail.SteamAppId);
                     integrationInfo.InternalGameId = game.Id;
+                    integrationInfo.HasErrors = false;
                     integrationInfo.Date = DateTime.Now;
                     await httpClient.PostAsJsonAsync("IntegrationInfo", integrationInfo);
                     _logger.LogInformation($"Created integration info(Id = {integrationInfo.InternalGameId})");
