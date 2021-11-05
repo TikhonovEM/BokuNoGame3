@@ -1,4 +1,5 @@
-using Bng.GamesAPI.Models;
+using Bng.GamesAPI.Contexts;
+using Bng.Shared.Models;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;

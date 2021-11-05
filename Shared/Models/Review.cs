@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Bng.GamesAPI.Models
+namespace Bng.Shared.Models
 {
     public class Review
     {

@@ -1,4 +1,4 @@
-﻿using Bng.GamesAPI.Models;
+﻿using Bng.Shared.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;

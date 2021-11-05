@@ -1,10 +1,11 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Bng.Shared.Models;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Bng.GamesAPI.Models
+namespace Bng.GamesAPI.Contexts
 {
     public class AppDBContext : DbContext
     {

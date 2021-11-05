@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Bng.GamesAPI.Models
+namespace Bng.Shared.Models
 {
     public class News
     {

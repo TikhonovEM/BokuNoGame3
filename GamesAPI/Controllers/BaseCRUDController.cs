@@ -1,4 +1,4 @@
-﻿using Bng.GamesAPI.Models;
+﻿using Bng.Shared.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
+using Bng.GamesAPI.Contexts;
 
 namespace Bng.GamesAPI.Controllers
 {
