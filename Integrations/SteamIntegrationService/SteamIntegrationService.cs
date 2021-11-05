@@ -9,7 +9,8 @@ using Steam.Models.SteamStore;
 using SteamWebAPI2.Utilities;
 using SteamWebAPI2.Interfaces;
 using Bng.Shared.Models;
-using System.Net;
+using System.Net.Http;
+using Newtonsoft.Json;
 
 namespace Bng.SteamIntegrationService
 {
@@ -18,6 +19,7 @@ namespace Bng.SteamIntegrationService
         private readonly ILogger<SteamIntegrationService> _logger;
         private readonly string _steamApiKey = Program.Configuration["IntegrationSettings:SteamWebApiKey"];
         private readonly string _maxPacketSize = Program.Configuration["IntegrationSettings:MaxPacketSize"];
+        private readonly string _baseAddress = Program.Configuration["GamesAPI:BaseAddress"];
         private List<StoreAppDetailsDataModel> AppDetails = new();
 
         public SteamIntegrationService(IScheduleConfig<SteamIntegrationService> config, ILogger<SteamIntegrationService> logger)
@@ -52,10 +54,10 @@ namespace Bng.SteamIntegrationService
             var steamWebInterfaceFactory = new SteamWebInterfaceFactory(_steamApiKey);
             var steamApps = steamWebInterfaceFactory.CreateSteamWebInterface<SteamApps>();
 
-            /*var ids = _appDBContext.IntegrationInfos
-                .Where(ii => ii.ExternalSystemDescriptor.Equals("Steam"))
-                .Select(ii => ii.ExternalGameId);*/
-            var ids = new List<int>();
+            using var httpClient = new HttpClient();
+            httpClient.BaseAddress = new Uri(_baseAddress);
+            var response = await httpClient.GetStringAsync("IntegrationInfo/GetAllSystemIds/Steam");
+            var ids = JsonConvert.DeserializeObject<List<int>>(response);
 
             var listResponse = await steamApps.GetAppListAsync();
             var appInfoList = listResponse.Data.Where(a => !ids.Any(id => id == a.AppId));
@@ -134,22 +136,20 @@ namespace Bng.SteamIntegrationService
                     game.Genre = genreValue;
                     game.ReleaseDate = Convert.ToDateTime(appDetail.ReleaseDate.Date);
                     game.AgeRating = appDetail.RequiredAge.ToString();
-                    using (var webclient = new WebClient())
-                    {
-                        game.Logo = webclient.DownloadData(appDetail.HeaderImage);
-                    }
-                    /*await _appDBContext.Games.AddAsync(game);
-                    await _appDBContext.SaveChangesAsync();
+                    using var httpClient = new HttpClient();
+                    game.Logo = await httpClient.GetByteArrayAsync(appDetail.HeaderImage);
+
+                    httpClient.BaseAddress = new Uri(_baseAddress);
+                    await httpClient.PostAsJsonAsync("Game", game);
                     _logger.LogInformation($"Created game(Id = {game.Name})");
 
                     var integrationInfo = new IntegrationInfo();
-                    integrationInfo.ExternalSystemDescriptor = ExternalSystemDescriptor;
+                    integrationInfo.ExternalSystemDescriptor = "Steam";
                     integrationInfo.ExternalGameId = Convert.ToInt32(appDetail.SteamAppId);
                     integrationInfo.InternalGameId = game.Id;
                     integrationInfo.Date = DateTime.Now;
-                    await _appDBContext.IntegrationInfos.AddAsync(integrationInfo);
-                    await _appDBContext.SaveChangesAsync();
-                    _logger.LogInformation($"Created integration info(Id = {integrationInfo.InternalGameId})");*/
+                    await httpClient.PostAsJsonAsync("IntegrationInfo", integrationInfo);
+                    _logger.LogInformation($"Created integration info(Id = {integrationInfo.InternalGameId})");
                 }
                 catch (Exception e)
                 {

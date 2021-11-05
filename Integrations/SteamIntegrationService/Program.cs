@@ -24,7 +24,7 @@ namespace Bng.SteamIntegrationService
                     services.AddCronJob<SteamIntegrationService>(c =>
                     {
                         c.TimeZoneInfo = TimeZoneInfo.Local;
-                        c.CronExpression = @"* * * * *";
+                        c.CronExpression = Configuration["IntegrationSettings:CronSchedule"];
                     });
                 });
     }

@@ -16,7 +16,7 @@ namespace Bng.SteamIntegrationService
         private readonly TimeZoneInfo _timeZoneInfo;
         public CronJobService(string cronExpression, TimeZoneInfo timeZoneInfo)
         {
-            _expression = CronExpression.Parse(cronExpression);
+            _expression = CronExpression.Parse(cronExpression, CronFormat.IncludeSeconds);
             _timeZoneInfo = timeZoneInfo;
         }
         public virtual async Task StartAsync(CancellationToken cancellationToken)
