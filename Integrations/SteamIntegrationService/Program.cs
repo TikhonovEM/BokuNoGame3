@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System;
@@ -9,6 +10,7 @@ namespace Bng.SteamIntegrationService
 {
     public class Program
     {
+        public static IConfiguration Configuration { get; private set; }
         public static void Main(string[] args)
         {
             CreateHostBuilder(args).Build().Run();
@@ -18,6 +20,7 @@ namespace Bng.SteamIntegrationService
             Host.CreateDefaultBuilder(args)
                 .ConfigureServices((hostContext, services) =>
                 {
+                    Configuration = hostContext.Configuration;
                     services.AddCronJob<SteamIntegrationService>(c =>
                     {
                         c.TimeZoneInfo = TimeZoneInfo.Local;
