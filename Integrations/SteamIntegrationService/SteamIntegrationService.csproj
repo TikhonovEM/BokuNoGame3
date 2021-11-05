@@ -14,4 +14,13 @@
   <ItemGroup>
     <ProjectReference Include="..\..\Shared\Shared.csproj" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="Steam.Models">
+      <HintPath>Libs\Steam.Models.dll</HintPath>
+    </Reference>
+    <Reference Include="SteamWebAPI2">
+      <HintPath>Libs\SteamWebAPI2.dll</HintPath>
+    </Reference>
+  </ItemGroup>
 </Project>
