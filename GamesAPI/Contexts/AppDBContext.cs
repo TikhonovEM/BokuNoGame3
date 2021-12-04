@@ -11,7 +11,6 @@ namespace Bng.GamesAPI.Contexts
     {
         public AppDBContext(DbContextOptions<AppDBContext> options) : base(options)
         {
-            Database.EnsureCreated();
         }
 
 
