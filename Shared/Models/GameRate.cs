@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace Bng.Shared.Models
 {
-    public class GameRate
+    public class GameRate : IEntity
     {
         public int Id { get; set; }
         public int GameId { get; set; }

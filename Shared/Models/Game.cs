@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Bng.Shared.Models
 {
-    public class Game
+    public class Game : IEntity
     {
         public int Id { get; set; }
         [Display(Name = "Название игры")]

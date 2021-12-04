@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace Bng.Shared.Models
 {
-    public class News
+    public class News : IEntity
     {
         public int Id { get; set; }
         public string AuthorId { get; set; }

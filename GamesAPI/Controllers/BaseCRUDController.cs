@@ -12,7 +12,7 @@ namespace Bng.GamesAPI.Controllers
 {
     public abstract class BaseCRUDController<TController, TModel> : ControllerBase 
         where TController : BaseCRUDController<TController, TModel>
-        where TModel : class
+        where TModel : class, IEntity
     {
         private AppDBContext _context;
         private ILogger<TController> _logger;
@@ -40,8 +40,7 @@ namespace Bng.GamesAPI.Controllers
                 Logger.LogError($"Can't add to DB. Exception message: {ex.Message}");
                 return StatusCode(400);
             }
-            var idProp = model.GetType().GetProperty("Id");
-            return StatusCode(200, idProp.GetValue(model));
+            return StatusCode(200, model.Id);
         }
 
         [HttpPut("{id}")]

@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace Bng.Shared.Models
 {
-    public class IntegrationInfo
+    public class IntegrationInfo : IEntity
     {
         public int Id { get; set; }
         public string ExternalSystemDescriptor { get; set; }

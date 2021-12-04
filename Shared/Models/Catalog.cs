@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Bng.Shared.Models
 {
-    public class Catalog
+    public class Catalog : IEntity
     {
         public int Id { get; set; }
         public string Name { get; set; }
