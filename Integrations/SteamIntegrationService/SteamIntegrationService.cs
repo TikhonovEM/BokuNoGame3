@@ -48,54 +48,76 @@ namespace Bng.SteamIntegrationService
 
         public async Task GetActualDataAsync()
         {
-            _logger.LogInformation("Start integration session with Steam API");
-            var appDetailsCollection = new List<StoreAppDetailsDataModel>();
-
-            var steamWebInterfaceFactory = new SteamWebInterfaceFactory(_steamApiKey);
-            var steamApps = steamWebInterfaceFactory.CreateSteamWebInterface<SteamApps>();
-
-            using var httpClient = new HttpClient();
-            httpClient.BaseAddress = new Uri(_baseAddress);
-            var response = await httpClient.GetStringAsync("IntegrationInfo/GetAllSystemIds/Steam");
-            var ids = JsonConvert.DeserializeObject<List<int>>(response);
-
-            var listResponse = await steamApps.GetAppListAsync();
-            var appInfoList = listResponse.Data.Where(a => !ids.Any(id => id == a.AppId)).Take(199);
-
-            var appsCount = 0;
-            var isMaxSizeExists = false;
-            if (_maxPacketSize != null)
+            try
             {
-                try
+                _logger.LogInformation("Start integration session with Steam API");
+                var appDetailsCollection = new List<StoreAppDetailsDataModel>();
+
+                var steamWebInterfaceFactory = new SteamWebInterfaceFactory(_steamApiKey);
+                var steamApps = steamWebInterfaceFactory.CreateSteamWebInterface<SteamApps>();
+
+                using var httpClient = new HttpClient();
+                httpClient.BaseAddress = new Uri(_baseAddress);
+                var response = await httpClient.GetStringAsync("IntegrationInfo/GetAllSystemIds/Steam");
+                var ids = JsonConvert.DeserializeObject<List<int>>(response);
+
+                var listResponse = await steamApps.GetAppListAsync();
+                var appInfoList = listResponse.Data.Where(a => !ids.Any(id => id == a.AppId)).Take(199);
+
+                var appsCount = 0;
+                var isMaxSizeExists = false;
+                if (_maxPacketSize != null)
                 {
-                    appsCount = Convert.ToInt32(_maxPacketSize);
-                    isMaxSizeExists = true;
+                    try
+                    {
+                        appsCount = Convert.ToInt32(_maxPacketSize);
+                        isMaxSizeExists = true;
+                    }
+                    catch { }
                 }
-                catch { }
-            }
-            var steamStoreInterface = steamWebInterfaceFactory.CreateSteamStoreInterface();
-            var lang = "russian";
-            foreach (var app in appInfoList)
-            {
-                var hasErrors = false;
-                StoreAppDetailsDataModel appDetails = null;
-                try
+                var steamStoreInterface = steamWebInterfaceFactory.CreateSteamStoreInterface();
+                var lang = "russian";
+                foreach (var app in appInfoList)
                 {
-                    appDetails = await steamStoreInterface.GetStoreAppDetailsAsync(app.AppId, lang);
-                }
-                catch (NullReferenceException)
-                {
-                    _logger.LogError("Не удалось получить информацию о приложении {0}({1})", app.Name, app.AppId);
-                    hasErrors = true;
-                }
-                catch (Exception e)
-                {
-                    _logger.LogError(e, "Произошла непредвиденная ошибка: ");
-                    hasErrors = true;
-                }
-                finally
-                {
-                    if (hasErrors && app?.AppId != default)
+                    var hasErrors = false;
+                    StoreAppDetailsDataModel appDetails = null;
+                    try
+                    {
+                        appDetails = await steamStoreInterface.GetStoreAppDetailsAsync(app.AppId, lang);
+                    }
+                    catch (NullReferenceException)
+                    {
+                        _logger.LogError("Не удалось получить информацию о приложении {0}({1})", app.Name, app.AppId);
+                        hasErrors = true;
+                    }
+                    catch (Exception e)
+                    {
+                        _logger.LogError(e, "Произошла непредвиденная ошибка: ");
+                        hasErrors = true;
+                    }
+                    finally
+                    {
+                        if (hasErrors && app?.AppId != default)
+                        {
+                            var integrationInfo = new IntegrationInfo();
+                            integrationInfo.ExternalSystemDescriptor = "Steam";
+                            integrationInfo.ExternalGameId = Convert.ToInt32(app.AppId);
+                            integrationInfo.HasErrors = true;
+                            integrationInfo.Date = DateTime.Now;
+                            await httpClient.PostAsJsonAsync("IntegrationInfo", integrationInfo);
+                            _logger.LogInformation($"Created integration info with errors(AppId = {app.AppId})");
+                        }
+                    }
+                    if (hasErrors)
+                        continue;
+                    // Skip DLC
+                    if (appDetails.Type.Equals("game"))
+                    {
+                        AppDetails.Add(appDetails);
+                        if (isMaxSizeExists && AppDetails.Count >= appsCount)
+                            break;
+                    }
+                    else
                     {
                         var integrationInfo = new IntegrationInfo();
                         integrationInfo.ExternalSystemDescriptor = "Steam";
@@ -106,95 +128,89 @@ namespace Bng.SteamIntegrationService
                         _logger.LogInformation($"Created integration info with errors(AppId = {app.AppId})");
                     }
                 }
-                if (hasErrors)
-                    continue;
-                // Skip DLC
-                if (appDetails.Type.Equals("game"))
-                {
-                    AppDetails.Add(appDetails);
-                    if (isMaxSizeExists && AppDetails.Count >= appsCount)
-                        break;
-                }
-                else
-                {
-                    var integrationInfo = new IntegrationInfo();
-                    integrationInfo.ExternalSystemDescriptor = "Steam";
-                    integrationInfo.ExternalGameId = Convert.ToInt32(app.AppId);
-                    integrationInfo.HasErrors = true;
-                    integrationInfo.Date = DateTime.Now;
-                    await httpClient.PostAsJsonAsync("IntegrationInfo", integrationInfo);
-                    _logger.LogInformation($"Created integration info with errors(AppId = {app.AppId})");
-                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Exception while get actual data from Steam.");
             }
         }
 
         public async Task SaveChangesAsync()
         {
-            _logger.LogInformation("Start migration to DB");
-            foreach (var appDetail in AppDetails)
+            try
             {
-                try
+
+
+                _logger.LogInformation("Start migration to DB");
+                foreach (var appDetail in AppDetails)
                 {
-                    var game = new Game();
-                    game.Name = appDetail.Name;
-                    game.Description = appDetail.DetailedDescription;
-                    game.Publisher = appDetail.Publishers.FirstOrDefault();
-                    game.Developer = appDetail.Developers.FirstOrDefault();
-                    var genres = appDetail.Genres;
-                    var genreValue = Genre.Default;
-                    foreach (var genre in genres)
+                    try
                     {
-                        // Поиск первого подходящего жанра.
-                        genreValue = genre.Description switch
+                        var game = new Game();
+                        game.Name = appDetail.Name;
+                        game.Description = appDetail.DetailedDescription;
+                        game.Publisher = appDetail.Publishers.FirstOrDefault();
+                        game.Developer = appDetail.Developers.FirstOrDefault();
+                        var genres = appDetail.Genres;
+                        var genreValue = Genre.Default;
+                        foreach (var genre in genres)
                         {
-                            "Экшены" => Genre.Action,
-                            "Симуляторы" => Genre.Simulation,
-                            "Стратегии" => Genre.Strategy,
-                            "Ролевые игры" => Genre.RPG,
-                            "Головоломки" => Genre.Puzzle,
-                            "Казуальные игры" => Genre.Arcade,
-                            "Гонки" => Genre.Race,
-                            _ => Genre.Default
-                        };
-                        if (genreValue != Genre.Default)
-                            break;
-                    }
-                    game.Genre = genreValue;
-                    game.ReleaseDate = Convert.ToDateTime(appDetail.ReleaseDate.Date);
-                    game.AgeRating = appDetail.RequiredAge.ToString();
-                    using (var httpClient = new HttpClient())
-                    {
-                        game.Logo = await httpClient.GetByteArrayAsync(appDetail.HeaderImage);
-                    }
+                            // Поиск первого подходящего жанра.
+                            genreValue = genre.Description switch
+                            {
+                                "Экшены" => Genre.Action,
+                                "Симуляторы" => Genre.Simulation,
+                                "Стратегии" => Genre.Strategy,
+                                "Ролевые игры" => Genre.RPG,
+                                "Головоломки" => Genre.Puzzle,
+                                "Казуальные игры" => Genre.Arcade,
+                                "Гонки" => Genre.Race,
+                                _ => Genre.Default
+                            };
+                            if (genreValue != Genre.Default)
+                                break;
+                        }
+                        game.Genre = genreValue;
+                        game.ReleaseDate = Convert.ToDateTime(appDetail.ReleaseDate.Date);
+                        game.AgeRating = appDetail.RequiredAge.ToString();
+                        using (var httpClient = new HttpClient())
+                        {
+                            game.Logo = await httpClient.GetByteArrayAsync(appDetail.HeaderImage);
+                        }
 
-                    var gameId = string.Empty;
-                    using (var httpClient = new HttpClient())
-                    {
-                        httpClient.BaseAddress = new Uri(_baseAddress);
-                        var response = httpClient.PostAsJsonAsync("Game", game).GetAwaiter().GetResult();
-                        gameId = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
-                        _logger.LogInformation($"Created game(Name = {game.Name})");
-                    }
+                        var gameId = string.Empty;
+                        using (var httpClient = new HttpClient())
+                        {
+                            httpClient.BaseAddress = new Uri(_baseAddress);
+                            var response = httpClient.PostAsJsonAsync("Game", game).GetAwaiter().GetResult();
+                            gameId = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+                            _logger.LogInformation($"Created game(Name = {game.Name})");
+                        }
 
-                    var integrationInfo = new IntegrationInfo();
-                    integrationInfo.ExternalSystemDescriptor = "Steam";
-                    integrationInfo.ExternalGameId = Convert.ToInt32(appDetail.SteamAppId);
-                    integrationInfo.InternalGameId = Convert.ToInt32(gameId);
-                    integrationInfo.HasErrors = false;
-                    integrationInfo.Date = DateTime.Now;
-                    using (var httpClient = new HttpClient())
+                        var integrationInfo = new IntegrationInfo();
+                        integrationInfo.ExternalSystemDescriptor = "Steam";
+                        integrationInfo.ExternalGameId = Convert.ToInt32(appDetail.SteamAppId);
+                        integrationInfo.InternalGameId = Convert.ToInt32(gameId);
+                        integrationInfo.HasErrors = false;
+                        integrationInfo.Date = DateTime.Now;
+                        using (var httpClient = new HttpClient())
+                        {
+                            httpClient.BaseAddress = new Uri(_baseAddress);
+                            await httpClient.PostAsJsonAsync("IntegrationInfo", integrationInfo);
+                            _logger.LogInformation($"Created integration info(Id = {integrationInfo.InternalGameId})");
+                        }
+                    }
+                    catch (Exception e)
                     {
-                        httpClient.BaseAddress = new Uri(_baseAddress);
-                        await httpClient.PostAsJsonAsync("IntegrationInfo", integrationInfo);
-                        _logger.LogInformation($"Created integration info(Id = {integrationInfo.InternalGameId})");
+                        _logger.LogError(e, "Произошла ошибка при миграции в БД");
                     }
                 }
-                catch (Exception e)
-                {
-                    _logger.LogError(e, "Произошла ошибка при миграции в БД");
-                }
+                _logger.LogInformation("Finish migration to DB");
             }
-            _logger.LogInformation("Finish migration to DB");
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Exception while save actual data from Steam.");
+            }
         }
     }
 }
