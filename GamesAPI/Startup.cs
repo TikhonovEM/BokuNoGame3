@@ -59,7 +59,9 @@ namespace Bng.GamesAPI
 
             app.UseStaticFiles();
 
-            app.UseHttpsRedirection();
+            var useHttps = Configuration["UseHttps"];
+            if (useHttps != null && bool.TryParse(useHttps, out var result) && result)
+                app.UseHttpsRedirection();
 
             app.UseRouting();
 
