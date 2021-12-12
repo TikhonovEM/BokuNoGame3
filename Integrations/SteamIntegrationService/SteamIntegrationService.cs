@@ -171,7 +171,21 @@ namespace Bng.SteamIntegrationService
                                 break;
                         }
                         game.Genre = genreValue;
-                        game.ReleaseDate = Convert.ToDateTime(appDetail.ReleaseDate.Date);
+                        if (DateTime.TryParse(appDetail.ReleaseDate.Date, out var result))
+                        {
+                            game.ReleaseDate = result;
+                        }                        
+                        else
+                        {
+                            using (var httpClient = new HttpClient())
+                            {
+                                _logger.LogDebug("Send request to date_converter");
+                                httpClient.BaseAddress = new Uri(Program.Configuration["DateConverterAddress"]);
+                                var releaseDateStr = await httpClient.GetStringAsync($"parse?date={appDetail.ReleaseDate.Date}");
+                                _logger.LogDebug($"date_converter response = '{releaseDateStr}'");
+                                game.ReleaseDate = DateTime.Parse(releaseDateStr);
+                            }
+                        }
                         game.AgeRating = appDetail.RequiredAge.ToString();
                         using (var httpClient = new HttpClient())
                         {
