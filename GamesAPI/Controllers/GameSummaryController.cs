@@ -12,6 +12,10 @@ namespace Bng.GamesAPI.Controllers
     [ApiController]
     public class GameSummaryController : BaseCRUDController<GameSummaryController, GameSummary>
     {
-
+        [HttpGet("User/{userid?}")]
+        public object GetGameSummariesByUser(string userid)
+        {
+            return this.Context.GameSummaries.Where(gs => gs.UserId.Equals(userid));
+        }
     }
 }

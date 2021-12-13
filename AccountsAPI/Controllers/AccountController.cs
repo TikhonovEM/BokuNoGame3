@@ -86,18 +86,20 @@ namespace Bng.AccountsAPI.Controllers
         public async Task<object> Profile(string username)
         {
             var user = username != null && !username.Equals("undefined") ? await _userManager.FindByNameAsync(username) : await _userManager.GetUserAsync(User);
-            using (var client = new HttpClient())
+
+            using var client = new HttpClient();
+            client.BaseAddress = new Uri(Startup.Configuration["GamesAPIBaseAddress"]);
+
+            var gameSummaries = JsonConvert.DeserializeObject<List<GameSummary>>(await client.GetStringAsync($"/api/GameSummary/User/{user.Id}"));
+
+            var catalogs = JsonConvert.DeserializeObject<List<Catalog>>(await client.GetStringAsync("/api/Catalog/All"));
+
+            return new
             {
-                client.BaseAddress = new Uri(Startup.Configuration["GamesAPIBaseAddress"]);
-                var gameSummaries = JsonConvert.DeserializeObject<List<GameSummary>>(await client.GetStringAsync($"/api/GameSummary/{user.Id}"));
-                var catalogs = JsonConvert.DeserializeObject<List<Catalog>>(await client.GetStringAsync("/api/Catalog/"));
-                return new
-                {
-                    user,
-                    gameSummaries,
-                    catalogs
-                };
-            }
+                user,
+                gameSummaries,
+                catalogs
+            };
         }
     }
 }

@@ -12,6 +12,10 @@ namespace Bng.GamesAPI.Controllers
     [ApiController]
     public class CatalogController : BaseCRUDController<CatalogController, Catalog>
     {
-
+        [HttpGet("All")]
+        public object GetAll()
+        {
+            return Context.Catalogs.ToList();
+        }
     }
 }
