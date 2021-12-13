@@ -7,7 +7,10 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
+using Bng.Shared.Models;
 
 namespace Bng.AccountsAPI.Controllers
 {
@@ -31,8 +34,8 @@ namespace Bng.AccountsAPI.Controllers
         [HttpPost("Login")]
         public async Task<IActionResult> Login(Credentials credentials)
         {
-            var result = 
-                await _signInManager.PasswordSignInAsync(credentials.Login, credentials.Password, credentials.RememberMe, false);            
+            var result =
+                await _signInManager.PasswordSignInAsync(credentials.Login, credentials.Password, credentials.RememberMe, false);
             if (result.Succeeded)
                 return RedirectToAction("UserInfo");
 
@@ -80,9 +83,21 @@ namespace Bng.AccountsAPI.Controllers
         }
 
         [HttpGet("{username?}")]
-        public IActionResult Profile(string username)
+        public async Task<object> Profile(string username)
         {
-            return Ok();
+            var user = username != null && !username.Equals("undefined") ? await _userManager.FindByNameAsync(username) : await _userManager.GetUserAsync(User);
+            using (var client = new HttpClient())
+            {
+                client.BaseAddress = new Uri(Startup.Configuration["GamesAPIBaseAddress"]);
+                var gameSummaries = JsonConvert.DeserializeObject<List<GameSummary>>(await client.GetStringAsync($"/api/GameSummary/{user.Id}"));
+                var catalogs = JsonConvert.DeserializeObject<List<Catalog>>(await client.GetStringAsync("/api/Catalog/"));
+                return new
+                {
+                    user,
+                    gameSummaries,
+                    catalogs
+                };
+            }
         }
     }
 }
