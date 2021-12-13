@@ -37,8 +37,17 @@ def parse():
 
     m = two_years.match(date)
     if m is not None:
-        year1 = '20'+m.group('year1') if len(m.group('year1')) == 2 else m.group('year1')
-        year2 = '20'+m.group('year2') if len(m.group('year2')) == 2 else m.group('year2')
+        if int(m.group('year1')) > 21:
+            year1_c = '20'
+        else:
+            year1_c = '19'
+        if int(m.group('year2')) > 21:
+            year2_c = '20'
+        else:
+            year2_c = '19'
+
+        year1 = year1_c+m.group('year1') if len(m.group('year1')) == 2 else m.group('year1')
+        year2 = year2_c+m.group('year2') if len(m.group('year2')) == 2 else m.group('year2')
         return 'D:'+year1+'-'+year2
 
     m = only_year.match(date)
