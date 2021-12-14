@@ -34,6 +34,7 @@ bld/
 [Oo]ut/
 [Ll]og/
 [Ll]ogs/
+.vscode/
 
 # Visual Studio 2015/2017 cache/options directory
 .vs/
@@ -366,3 +367,4 @@ FodyWeavers.xsd
 
 #python virtual env
 etc/date_converter/venv/
+Integrations/EpicIntegrationService/.venv/
