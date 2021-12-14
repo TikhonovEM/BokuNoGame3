@@ -53,7 +53,7 @@ namespace Bng.AccountsAPI.Controllers
         public async Task<IActionResult> Register([FromBody] Credentials credentials)
         {
             var user = new User { UserName = credentials.Login };
-            //user.Photo = System.IO.File.ReadAllBytes(Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "Files", "default-avatar.jpg"));
+            user.Photo = System.IO.File.ReadAllBytes(Path.Combine(Directory.GetCurrentDirectory(), "Files", "default-avatar.jpg"));
             // добавляем пользователя
             var result = await _userManager.CreateAsync(user, credentials.Password);
             if (result.Succeeded)
@@ -61,7 +61,7 @@ namespace Bng.AccountsAPI.Controllers
                 // установка куки
                 await _userManager.AddToRoleAsync(user, "User");
                 await _signInManager.SignInAsync(user, false);
-                return Ok(await UserInfo());
+                return RedirectToAction("UserInfo");
             }
             else
                 return StatusCode(400, new { Errors = result.Errors.Select(e => e.Description) });
