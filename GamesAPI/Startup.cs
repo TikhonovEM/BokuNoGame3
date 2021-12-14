@@ -33,13 +33,8 @@ namespace Bng.GamesAPI
 
             var defaultConnection = Configuration.GetConnectionString("DefaultConnection");
 
-            var dbEngine = Configuration["DatabaseEngine"];
-            if (Equals(dbEngine.ToLower().Trim(), "mssql"))
-                services.AddDbContext<AppDBContext>(options =>
-                    options.UseSqlServer(defaultConnection));
-            else
-                services.AddDbContext<AppDBContext>(options =>
-                    options.UseNpgsql(defaultConnection));
+            services.AddDbContext<AppDBContext>(options =>
+                options.UseNpgsql(defaultConnection));
 
             services.AddSwaggerGen(c =>
             {
