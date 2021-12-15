@@ -7,8 +7,21 @@ from epicstore_api import EpicGamesStoreAPI
 from cfg import *
 
 
+class Offset:
+    offset = 0
+
+    def __init__(self):
+        with open('offset.txt', 'r') as f:
+            self.offset = int(f.readline())
+
+    def save(self):
+        with open('offset.txt', 'w') as f:
+            self.offset = f.write(str(self.offset))
+
+
 api = EpicGamesStoreAPI("ru")
 verify = False if not VERIFY_SSL else PATH_TO_SSL_CERTIFICATE
+offset = Offset()
 
 
 def main():
@@ -32,6 +45,7 @@ def main():
         except Exception as ex:
             send_integration_info(slug, True, None)
             print(f'Error while get game info with slug = {slug}. {str(ex)}')
+    offset.save()
 
 
 def send_integration_info(slug, hasErrors, gameId):
@@ -42,13 +56,19 @@ def send_integration_info(slug, hasErrors, gameId):
     info['Date'] = datetime.now().isoformat()
     if not hasErrors:
         info['InternalGameId'] = gameId
-    return requests.post(f'{GAMES_API_BASE_ADDRESS}IntegrationInfo', json=info, verify=verify)
+    response = requests.post(
+        f'{GAMES_API_BASE_ADDRESS}IntegrationInfo', json=info, verify=verify)
+    if response.status_code == 200:
+        offset.offset = offset.offset + 1
+    return response
 
 
 def get_slugs():
+
     games = api.fetch_store_games(
         product_type='games/edition/base|bundles/games|editors',
         count=MAX_PACKET_SIZE,
+        start=offset.offset,
         sort_by='releaseDate',
         sort_dir='ASC',
         allow_countries="RU"
