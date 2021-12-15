@@ -1,21 +1,53 @@
+from datetime import datetime
+import base64
+
 from epicstore_api import EpicGamesStoreAPI
-from flask import Flask
+import requests
+
+from cfg import *
 
 
-app = Flask(__name__)
 api = EpicGamesStoreAPI("ru")
+verify = False if not VERIFY_SSL else PATH_TO_SSL_CERTIFICATE
 
 
-def main():
+def main():    
+    response = requests.get(f'{GAMES_API_BASE_ADDRESS}IntegrationInfo/GetAllSystemIds/Epic', verify=verify)
+    ids = response.json()
+    print(ids)
+    return
+
     slugs = get_slugs()
-    for slug in slugs[0:5]:
-        productInfo = get_product(slug)
-        print(productInfo)
+    for slug in list(filter(lambda x: x not in ids, slugs))[0:MAX_PACKET_SIZE]:
+        try:
+            productInfo = get_product(slug)
+            gameId = int()
+            try:
+                r = requests.post(f'{GAMES_API_BASE_ADDRESS}Game', json=productInfo, verify=verify)
+                gameId = int(r.text)
+            except Exception as e:
+                send_integration_info(slug, True, None)
+                print(f'Error while create game with slug = {slug}. {str(e)}')
+            send_integration_info(slug, False, gameId)
+        except Exception as ex:
+            send_integration_info(slug, True, None)
+            print(f'Error while get game info with slug = {slug}. {str(ex)}')
+
+def send_integration_info(slug, hasErrors, gameId):
+    info = dict()
+    info['ExternalSystemDescriptor'] = 'Epic'
+    info['ExternalGameIdStr'] = slug
+    info['HasErrors'] = hasErrors
+    info['Date'] = datetime.now().isoformat(' ', 'seconds')
+    if not hasErrors:
+        info['InternalGameId'] = gameId
+    requests.post(f'{GAMES_API_BASE_ADDRESS}IntegrationInfo', json=info, verify=verify)
+
 
 def get_slugs():
     games = api.fetch_store_games(
             product_type='games/edition/base|bundles/games|editors',
-            count=10,
+            count=MAX_PACKET_SIZE,
             sort_by='releaseDate',
             sort_dir='ASC',
             allow_countries="RU"
@@ -40,7 +72,8 @@ def get_product(slug):
     page = product["pages"][0]
     productInfo["Publisher"] = page["data"]["meta"]["publisher"][0]
     productInfo["Developer"] = page["data"]["meta"]["developer"][0]
-    productInfo["LogoSrc"] = page["data"]["hero"]["logoImage"]["src"]
+    logoSrc = page["data"]["hero"]["logoImage"]["src"]
+    productInfo["Logo"] = base64.b64encode(requests.get(logoSrc).content).decode('utf-8')
     productInfo["ReleaseDate"] = page["data"]["meta"]["releaseDate"]
     genre = 0
     for tag in page["data"]["meta"]["tags"]:
@@ -49,7 +82,7 @@ def get_product(slug):
             break
     productInfo["Genre"] = genre
     productInfo["Description"] = page["data"]["about"]["description"]
-    productInfo["AgeRating"] = 0
+    productInfo["AgeRating"] = str()
     return productInfo
 
 
