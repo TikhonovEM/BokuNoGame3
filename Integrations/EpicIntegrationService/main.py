@@ -1,8 +1,8 @@
 from datetime import datetime
 import base64
+import requests
 
 from epicstore_api import EpicGamesStoreAPI
-import requests
 
 from cfg import *
 
