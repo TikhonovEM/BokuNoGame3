@@ -15,10 +15,12 @@ namespace Bng.GamesAPI.Controllers
         [HttpGet("GetAllSystemIds/{descriptor}")]
         public object GetAllSystemIds(string descriptor)
         {
-            var ids = Context.IntegrationInfos
-                .Where(ii => ii.ExternalSystemDescriptor.Equals(descriptor))
-                .Select(ii => ii.ExternalGameId);
-            return ids.ToList();
+            var infos = Context.IntegrationInfos
+                .Where(ii => ii.ExternalSystemDescriptor.Equals(descriptor));
+            if (infos.Any(ii => !string.IsNullOrWhiteSpace(ii.ExternalGameIdStr)))
+                return infos.Select(ii => ii.ExternalGameIdStr).ToList();
+            else
+                return infos.Select(ii => ii.ExternalGameId).ToList();
         }
     }
 }
