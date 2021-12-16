@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore.Migrations;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
-namespace Bng.Bng.GamesAPI.Migrations
+namespace Bng.GamesAPI.Migrations
 {
     public partial class InitalMigration : Migration
     {

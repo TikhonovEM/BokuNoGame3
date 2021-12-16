@@ -1,6 +1,8 @@
+using Bng.GamesAPI.Contexts;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using NLog.Web;
@@ -13,12 +15,29 @@ namespace Bng.GamesAPI
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
             var logger = NLog.Web.NLogBuilder.ConfigureNLog("nlog.config").GetCurrentClassLogger();
             try
             {
                 var webHost = BuildWebHost(args);
+
+                using (var scope = webHost.Services.CreateScope())
+                {
+                    var services = scope.ServiceProvider;
+
+                    try
+                    {
+                        var context = services.GetService<AppDBContext>();
+                        await Helpers.InitializationService.InitializeAsync(context);
+                    }
+                    catch
+                    {
+
+                    }
+
+                }
+
                 webHost.Run();
             }
             catch (Exception e)

@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
-    <RootNamespace>Bng.Bng.GamesAPI</RootNamespace>
+    <RootNamespace>Bng.GamesAPI</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>

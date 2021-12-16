@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
-namespace Bng.Bng.GamesAPI.Migrations
+namespace Bng.GamesAPI.Migrations
 {
     [DbContext(typeof(AppDBContext))]
     [Migration("20211214104404_InitalMigration")]
