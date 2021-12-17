@@ -87,7 +87,15 @@ namespace Bng.GamesAPI.Controllers
         [EnableQuery]
         public virtual IQueryable<TModel> Query()
         {
-            return this.Context.Set<TModel>().AsNoTracking();
+            try
+            {
+                return this.Context.Set<TModel>().AsNoTracking();
+            }
+            catch (Exception e)
+            {
+                Logger.LogError(e, "Error while executing get query request. ");
+            }
+            return null;
         }
 
     }
