@@ -7,6 +7,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Bng.GamesAPI.Contexts;
+using Microsoft.AspNet.OData;
+using Microsoft.EntityFrameworkCore;
 
 namespace Bng.GamesAPI.Controllers
 {
@@ -79,6 +81,13 @@ namespace Bng.GamesAPI.Controllers
             }
             else
                 return StatusCode(413);
+        }
+
+        [HttpGet("Query")]
+        [EnableQuery]
+        public virtual IQueryable<TModel> Query()
+        {
+            return this.Context.Set<TModel>().AsNoTracking();
         }
 
     }
