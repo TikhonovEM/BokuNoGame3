@@ -28,8 +28,8 @@ def parse():
 
     m = full_date.match(date)
     if m is not None:
-        day = m.group('day')
-        month = m.group('month')
+        day = m.group('day').rjust(2, '0')
+        month = m.group('month').rjust(2, '0')
         year = m.group('year')
         if len(year) == 2: year = '20'+year
         month = month_dict[month]
