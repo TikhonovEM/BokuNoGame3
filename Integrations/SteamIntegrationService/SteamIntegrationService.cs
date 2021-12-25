@@ -179,10 +179,19 @@ namespace Bng.SteamIntegrationService
                         {
                             using (var httpClient = new HttpClient())
                             {
-                                _logger.LogDebug("Send request to date_converter");
-                                httpClient.BaseAddress = new Uri(Program.Configuration["DateConverterAddress"]);
-                                var releaseDateStr = await httpClient.GetStringAsync($"parse?date={appDetail.ReleaseDate.Date}");
-                                _logger.LogDebug($"date_converter response = '{releaseDateStr}'");
+                                
+                                var releaseDateStr = string.Empty;
+                                try
+                                {
+                                    _logger.LogDebug("Send request to date_converter");
+                                    httpClient.BaseAddress = new Uri(Program.Configuration["DateConverterAddress"]);
+                                    releaseDateStr = await httpClient.GetStringAsync($"parse?date={appDetail.ReleaseDate.Date}");
+                                    _logger.LogDebug($"date_converter response = '{releaseDateStr}'");
+                                }
+                                catch (Exception e)
+                                {
+                                    _logger.LogError(e, "Error while send request to date_converter");
+                                }
                                 game.ReleaseDate = DateTime.Parse(releaseDateStr);
                             }
                         }
