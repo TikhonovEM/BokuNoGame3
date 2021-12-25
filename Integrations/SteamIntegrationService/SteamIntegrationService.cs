@@ -226,6 +226,17 @@ namespace Bng.SteamIntegrationService
                     catch (Exception e)
                     {
                         _logger.LogError(e, "Произошла ошибка при миграции в БД");
+                        var integrationInfo = new IntegrationInfo();
+                        integrationInfo.ExternalSystemDescriptor = "Steam";
+                        integrationInfo.ExternalGameId = Convert.ToInt32(appDetail.SteamAppId);
+                        integrationInfo.HasErrors = true;
+                        integrationInfo.Date = DateTime.Now;
+                        using (var httpClient = new HttpClient())
+                        {
+                            httpClient.BaseAddress = new Uri(_baseAddress);
+                            await httpClient.PostAsJsonAsync("IntegrationInfo", integrationInfo);
+                            _logger.LogInformation($"Created integration info with errors(ExternalId = {appDetail.SteamAppId})");
+                        }
                     }
                 }
                 _logger.LogInformation("Finish migration to DB");
