@@ -7,8 +7,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Bng.GamesAPI.Contexts;
-using Microsoft.AspNet.OData;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.OData.Query;
 
 namespace Bng.GamesAPI.Controllers
 {

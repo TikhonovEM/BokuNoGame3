@@ -1,11 +1,10 @@
 using Bng.GamesAPI.Contexts;
 using Bng.Shared.Models;
-using Microsoft.AspNet.OData.Builder;
-using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OData;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -32,8 +31,11 @@ namespace Bng.GamesAPI
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddControllers().AddNewtonsoftJson();
-            services.AddOData();
+            services.AddControllers()
+                .AddOData(options =>
+                {
+                    options.Filter().Select().Expand().OrderBy().Count().SetMaxTop(1000);
+                });
 
             var defaultConnection = Configuration.GetConnectionString("DefaultConnection");
 
@@ -69,8 +71,6 @@ namespace Bng.GamesAPI
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
-                endpoints.EnableDependencyInjection();
-                endpoints.Filter().Select().Expand().OrderBy().Count().MaxTop(1000);
             });
         }
 
