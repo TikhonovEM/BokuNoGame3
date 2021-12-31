@@ -12,12 +12,6 @@ export default class Game extends React.Component {
         };
     }
 
-    /*componentDidUpdate() {
-        const s = document.createElement('script');
-        s.src = "/js/rateit/scripts/jquery.rateit.min.js";
-        document.body.appendChild(s);
-    }*/
-
     componentDidMount() {
 
         const opts = {
@@ -34,21 +28,6 @@ export default class Game extends React.Component {
                 data: result,
                 isFetching: false
             }));
-
-        /*$("#user-rateit").bind("rated", function (ev) {
-            let url = '@Url.Content("~/")' + "Game/UpdateGameRate";
-            let gameId = '@Model.Game.Id';
-            let userId = '@userManager.GetUserId(User)';
-            $.post(url,
-                {
-                    gameId: gameId,
-                    userId: userId,
-                    rate: $(this).rateit('value') * 2
-                },
-                function (data) {
-                    $("#user-rate-value").text(data.rate);
-                });
-        });*/
     }
 
     render() {
