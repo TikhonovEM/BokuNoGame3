@@ -1,6 +1,7 @@
 ﻿import React from 'react';
 import ReactDOM from 'react-dom';
 import { BrowserRouter as Router, Route, Switch, NavLink } from 'react-router-dom';
+import { bng_games_fetch } from '../js/site';
 
 export default class MainPage extends React.Component {
     constructor(props) {
@@ -41,7 +42,7 @@ export default class MainPage extends React.Component {
                 'Content-Type': 'application/json'
             }
         }
-        fetch("/api/Game/CreateNews", opts).then(response => {
+        bng_games_fetch("/api/News", opts).then(response => {
             if (response.status == 200) {
                 response.json().then(res => {
                     this.setState({
@@ -62,21 +63,21 @@ export default class MainPage extends React.Component {
                 'Accept-Encoding': 'gzip;q=1.0, compress;q=0.5'
             }
         };
-        fetch("/api/Game/GetTopMostPopularGames?top=8", opts)
+        bng_games_fetch("/api/Game/Query?$top=8", opts)
             .then(res => res.json())
             .then((result) => this.setState({
                 games: result,
                 isFetchingGames: false
             }));
 
-        fetch("/api/Game/GetNews?isLocal=false", opts)
+        fetch("/api/News/?$filter=isLocal eq false", opts)
             .then(res => res.json())
             .then((result) => this.setState({
                 globalNews: result,
                 isFetchingGlobalNews: false
             }));
 
-        fetch("/api/Game/GetNews?isLocal=true", opts)
+        fetch("/api/News/?$filter=isLocal eq true", opts)
             .then(res => res.json())
             .then((result) => this.setState({
                 localNews: result,
