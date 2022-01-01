@@ -12,6 +12,19 @@ namespace Bng.GamesAPI.Controllers
     [ApiController]
     public class GameController : BaseCRUDController<GameController, Game>
     {
-
+        [HttpGet("MostPopular")]
+        public object GetTopMostPopularGames(int top)
+        {
+            return Context.Games
+                .OrderByDescending(g => Context.GameSummaries.Where(gs => gs.GameId == g.Id && gs.CatalogId == 2).Count())
+                .Take(top)
+                .Select(g => new
+                {
+                    g.Id,
+                    g.Name,
+                    g.Logo
+                })
+                .ToList();
+        }
     }
 }
