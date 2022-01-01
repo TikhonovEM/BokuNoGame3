@@ -63,21 +63,21 @@ export default class MainPage extends React.Component {
                 'Accept-Encoding': 'gzip;q=1.0, compress;q=0.5'
             }
         };
-        bng_games_fetch("/api/Game/Query?$top=8", opts)
+        bng_games_fetch("/api/Game/MostPopular?top=8", opts)
             .then(res => res.json())
             .then((result) => this.setState({
                 games: result,
                 isFetchingGames: false
             }));
 
-        fetch("/api/News/?$filter=isLocal eq false", opts)
+        bng_games_fetch("/api/News/Query?$filter=isLocal eq false", opts)
             .then(res => res.json())
             .then((result) => this.setState({
                 globalNews: result,
                 isFetchingGlobalNews: false
             }));
 
-        fetch("/api/News/?$filter=isLocal eq true", opts)
+        bng_games_fetch("/api/News/Query?$filter=isLocal eq true", opts)
             .then(res => res.json())
             .then((result) => this.setState({
                 localNews: result,
