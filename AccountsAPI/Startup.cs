@@ -38,7 +38,7 @@ namespace Bng.AccountsAPI
             services.AddIdentity<User, IdentityRole>()
                 .AddEntityFrameworkStores<AppDBContext>();
 
-            services.AddDbContext<AppDBContext>(options => 
+            services.AddDbContext<AppDBContext>(options =>
                 options.UseNpgsql(defaultConnection));
 
             services.Configure<IdentityOptions>(options =>
@@ -49,6 +49,13 @@ namespace Bng.AccountsAPI
                 options.Password.RequireUppercase = false;
                 options.Password.RequireDigit = false;
             });
+
+            services.AddCors(options =>
+                options.AddDefaultPolicy(builder =>
+                    builder
+                    .WithOrigins(Configuration["ClientDomain"])
+                    .AllowAnyMethod()
+                    .AllowAnyHeader()));
 
             services.AddSwaggerGen(c =>
             {
@@ -71,6 +78,8 @@ namespace Bng.AccountsAPI
                 app.UseHttpsRedirection();
 
             app.UseRouting();
+
+            app.UseCors();
 
             app.UseAuthentication();
 

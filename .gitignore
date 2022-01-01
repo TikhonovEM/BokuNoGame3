@@ -369,3 +369,5 @@ FodyWeavers.xsd
 etc/date_converter/venv/
 Integrations/EpicIntegrationService/.venv/
 Integrations/EpicIntegrationService/cfg.py
+
+client-app/src/js/config.json

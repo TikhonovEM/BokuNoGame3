@@ -42,6 +42,13 @@ namespace Bng.GamesAPI
             services.AddDbContext<AppDBContext>(options =>
                 options.UseNpgsql(defaultConnection));
 
+            services.AddCors(options =>
+                options.AddDefaultPolicy(builder =>
+                    builder
+                    .WithOrigins(Configuration["ClientDomain"])
+                    .AllowAnyMethod()
+                    .AllowAnyHeader()));
+
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "BokuNoGame3", Version = "v1" });
@@ -65,6 +72,8 @@ namespace Bng.GamesAPI
                 app.UseHttpsRedirection();
 
             app.UseRouting();
+
+            app.UseCors();
 
             app.UseAuthorization();
 
