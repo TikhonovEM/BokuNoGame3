@@ -1,6 +1,7 @@
 ﻿import React, { useEffect } from 'react';
 import ReactDOM from 'react-dom';
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
+import { bng_games_fetch } from '../js/site'
 
 export default class Game extends React.Component {
     constructor(props) {
@@ -22,7 +23,7 @@ export default class Game extends React.Component {
                 'Accept-Encoding': 'gzip;q=1.0, compress;q=0.5'
             }
         };
-        fetch("/api/Game/" + this.props.match.params.gameId, opts)
+        bng_games_fetch("/api/Game/" + this.props.match.params.gameId, opts)
             .then(res => res.json())
             .then((result) => this.setState({
                 data: result,
