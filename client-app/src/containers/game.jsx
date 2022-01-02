@@ -1,20 +1,18 @@
-﻿import React, { useEffect } from 'react';
+﻿import React, { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom';
-import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Switch, useParams } from 'react-router-dom';
 import { bng_games_fetch } from '../js/site'
 
-export default class Game extends React.Component {
-    constructor(props) {
-        super(props);
+const Game = (props) => {
 
-        this.state = {
-            data: {},
+    let [pageState, setPageState] = useState(
+        {
+            game: {},
             isFetching: true
-        };
-    }
+        });
+    let params = useParams();
 
-    componentDidMount() {
-
+    useEffect(() => {
         const opts = {
             method: 'GET',
             headers: {
@@ -23,71 +21,72 @@ export default class Game extends React.Component {
                 'Accept-Encoding': 'gzip;q=1.0, compress;q=0.5'
             }
         };
-        bng_games_fetch("/api/Game/" + this.props.match.params.gameId, opts)
+        bng_games_fetch("/api/Game/" + params.gameId, opts)
             .then(res => res.json())
-            .then((result) => this.setState({
-                data: result,
-                isFetching: false
-            }));
-    }
+            .then((result) => setPageState(
+                {
+                    game: result,
+                    isFetching: false
+                }));
+    }, []);
 
-    render() {
-        if (this.state.isFetching)
-            return <div>...Loading</div>;
-        return (
-            <div className="container">
-                <section>
-                    <div>
-                        <header className="text-center mb-5">
-                            <h1>{this.state.data.game.name}</h1>
-                        </header>
-                        <div className="main-page row">
-                            <div className="image img-fluid col-md-4 mx-auto text-center">
-                                <img src={"data:image;base64," + this.state.data.game.logo} style={{ maxHeight: "500px", maxWidth: "400px" }} />
+    if (pageState.isFetching)
+        return <div>...Loading</div>;
+    return (
+        <div className="container">
+            <section>
+                <div>
+                    <header className="text-center mb-5">
+                        <h1>{pageState.game.name}</h1>
+                    </header>
+                    <div className="main-page row">
+                        <div className="image img-fluid col-md-4 mx-auto text-center">
+                            <img src={"data:image;base64," + pageState.game.logo} style={{ maxHeight: "500px", maxWidth: "400px" }} />
+                        </div>
+                        <div className="info col-md-4">
+                            <h4 className="bg-secondary"><b>Информация:</b></h4>
+                            <div>
+                                <b>Жанр: </b><span>{pageState.game.genre}</span>
                             </div>
-                            <div className="info col-md-4">
-                                <h4 className="bg-secondary"><b>Информация:</b></h4>
-                                <div>
-                                    <b>Жанр: </b><span>{this.state.data.game.genre}</span>
-                                </div>
-                                <div>
-                                    <b>Разработчик: </b><span>{this.state.data.game.developer}</span>
-                                </div>
-                                <div>
-                                    <b>Издатель: </b><span>{this.state.data.game.publisher}</span>
-                                </div>
-                                <div>
-                                    <b>Возрастной рейтинг: </b><span>{this.state.data.game.ageRating}</span>
-                                </div>
-                                <div>
-                                    <b>Дата выхода: </b><span>{this.state.data.game.releaseDate}</span>
-                                </div>
+                            <div>
+                                <b>Разработчик: </b><span>{pageState.game.developer}</span>
                             </div>
-                            <div className="rating col-md-4">
-                                <h4 className="bg-secondary"><b>Рейтинг:</b></h4>
-                                <div className="row">
-                                    <div className="col-md-5">
-                                        <div className="rateit ml-3 mt-1"
-                                            data-rateit-value={this.state.data.rate.currentRateStr}
-                                            data-rateit-step="0.01"
-                                            data-rateit-readonly="true"
-                                            data-rateit-mode="font" style={{ fontSize: "40px" }}></div>
-                                    </div>
-                                    <div className="col-md-7" style={{ fontSize: "35px" }}>{this.state.data.rate.currentRate}</div>
-                                </div>
+                            <div>
+                                <b>Издатель: </b><span>{pageState.game.publisher}</span>
                             </div>
-                            <div className="description row">
-                                <div className="col-md-4">
+                            <div>
+                                <b>Возрастной рейтинг: </b><span>{pageState.game.ageRating}</span>
+                            </div>
+                            <div>
+                                <b>Дата выхода: </b><span>{pageState.game.releaseDate}</span>
+                            </div>
+                        </div>
+                        <div className="rating col-md-4">
+                            <h4 className="bg-secondary"><b>Рейтинг:</b></h4>
+                            <div className="row">
+                                <div className="col-md-5">
+                                    <div className="rateit ml-3 mt-1"
+                                        data-rateit-value="5"//TODO FIX STUB {pageState.data.rate.currentRateStr}
+                                        data-rateit-step="0.01"
+                                        data-rateit-readonly="true"
+                                        data-rateit-mode="font" style={{ fontSize: "40px" }}></div>
                                 </div>
-                                <div className="col-md-8">
-                                    <h4 className="bg-secondary"><b>Описание:</b></h4>
-                                    <p dangerouslySetInnerHTML={{ __html: this.state.data.game.description }}></p>
-                                </div>
+                                <div className="col-md-7" style={{ fontSize: "35px" }}>10</div>
+                            </div>
+                        </div>
+                        <div className="description row">
+                            <div className="col-md-4">
+                            </div>
+                            <div className="col-md-8">
+                                <h4 className="bg-secondary"><b>Описание:</b></h4>
+                                <p dangerouslySetInnerHTML={{ __html: pageState.game.description }}></p>
                             </div>
                         </div>
                     </div>
-                </section>
-            </div>
-        );
-    }
+                </div>
+            </section>
+        </div>
+    );
 }
+
+export default Game;
