@@ -78,7 +78,8 @@ namespace Bng.AccountsAPI.Controllers
             {
                 IsSignedIn = _signInManager.IsSignedIn(User),
                 Roles = roles,
-                UserId = user?.Id
+                UserId = user?.Id,
+                UserNickname = user?.Nickname
             };
         }
 
