@@ -1,6 +1,7 @@
 ﻿import React from 'react';
 import { NavLink, Navigate } from 'react-router-dom';
 import './css/login.css';
+import { bng_accounts_fetch } from '../js/site';
 
 export default class Login extends React.Component {
     constructor(props) {
@@ -24,7 +25,7 @@ export default class Login extends React.Component {
 
     submitHandler(event) {
         event.preventDefault();
-        fetch("/api/Account/Login", {
+        bng_accounts_fetch("/api/Account/Login", {
             method: "POST",
             body: JSON.stringify({
                 'login': this.state.login,

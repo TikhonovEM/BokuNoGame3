@@ -1,6 +1,7 @@
 ﻿import React from 'react';
 import { Navigate } from 'react-router-dom';
 import './css/register.css';
+import { bng_accounts_fetch } from '../js/site';
 
 export default class Register extends React.Component {
     constructor(props) {
@@ -31,7 +32,7 @@ export default class Register extends React.Component {
             return;
         }
 
-        fetch("/api/Account/Register", {
+        bng_accounts_fetch("/api/Account/Register", {
             method: "POST",
             body: JSON.stringify({
                 'login': this.state.login,
@@ -66,7 +67,7 @@ export default class Register extends React.Component {
                         <h1 className="h3 mb-3 font-weight-normal card-header" style={{ textAlign: "center"}}> Регистрация </h1>
 
                         <div className="card-body">
-                            <input type="text" name="login" className="form-control" placeholder="Логин" required="" autofocus="" onChange={this.inputHandler} />
+                            <input type="text" name="login" className="form-control" placeholder="Логин" required="" autoFocus="" onChange={this.inputHandler} />
 
                             <input type="password" name="password" className="form-control" placeholder="Пароль" required="" onChange={this.inputHandler} />
 
