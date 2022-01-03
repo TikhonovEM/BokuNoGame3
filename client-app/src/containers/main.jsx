@@ -5,7 +5,6 @@ import { bng_games_fetch } from '../js/site';
 import GlobalNews from './globalnews';
 import LocalNews from './localnews';
 import TopGames from './topgames';
-import 'bootstrap-dark-5/dist/css/bootstrap-dark.min.css'
 
 export default class MainPage extends React.Component {
     constructor(props) {

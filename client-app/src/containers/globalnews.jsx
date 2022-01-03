@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Button, Modal, Form } from 'react-bootstrap';
 import { bng_games_fetch } from '../js/site';
-import 'bootstrap-dark-5/dist/css/bootstrap-dark.min.css'
 
 const GlobalNews = (props) => {
     const [globalNews, setGlobalNews] = useState(

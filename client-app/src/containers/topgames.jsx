@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { bng_games_fetch } from '../js/site';
 import { NavLink } from 'react-router-dom';
-import 'bootstrap-dark-5/dist/css/bootstrap-dark.min.css'
 
 const TopGames = (props) => {
     const [games, getGames] = useState(
