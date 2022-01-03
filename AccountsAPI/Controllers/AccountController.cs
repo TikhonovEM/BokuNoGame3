@@ -11,6 +11,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Bng.Shared.Models;
+using Microsoft.Extensions.Logging;
 
 namespace Bng.AccountsAPI.Controllers
 {
@@ -22,22 +23,28 @@ namespace Bng.AccountsAPI.Controllers
         private readonly SignInManager<User> _signInManager;
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly AppDBContext _context;
-        public AccountController(UserManager<User> userManager,
-            SignInManager<User> signInManager, RoleManager<IdentityRole> roleManager, AppDBContext context)
+        private readonly ILogger<AccountController> _logger;
+        public AccountController(UserManager<User> userManager, SignInManager<User> signInManager, 
+            RoleManager<IdentityRole> roleManager, AppDBContext context, ILogger<AccountController> logger)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _roleManager = roleManager;
             _context = context;
+            _logger = logger;
         }
 
         [HttpPost("Login")]
         public async Task<IActionResult> Login(Credentials credentials)
         {
+            _logger.LogInformation($"Start login for {credentials.Login}");
             var result =
                 await _signInManager.PasswordSignInAsync(credentials.Login, credentials.Password, credentials.RememberMe, false);
             if (result.Succeeded)
+            {
+                _logger.LogInformation($"Successful login for {credentials.Login}");
                 return RedirectToAction("UserInfo");
+            }
 
             return StatusCode(400);
         }
@@ -52,19 +59,29 @@ namespace Bng.AccountsAPI.Controllers
         [HttpPost("Register")]
         public async Task<IActionResult> Register([FromBody] Credentials credentials)
         {
-            var user = new User { UserName = credentials.Login };
-            user.Photo = System.IO.File.ReadAllBytes(Path.Combine(Directory.GetCurrentDirectory(), "Files", "default-avatar.jpg"));
-            // добавляем пользователя
-            var result = await _userManager.CreateAsync(user, credentials.Password);
-            if (result.Succeeded)
+            try
             {
-                // установка куки
-                await _userManager.AddToRoleAsync(user, "User");
-                await _signInManager.SignInAsync(user, false);
-                return RedirectToAction("UserInfo");
+                _logger.LogInformation($"Start register for {credentials.Login}");
+                var user = new User { UserName = credentials.Login };
+                user.Photo = System.IO.File.ReadAllBytes(Path.Combine(Directory.GetCurrentDirectory(), "Files", "default-avatar.jpg"));
+                // добавляем пользователя
+                var result = await _userManager.CreateAsync(user, credentials.Password);
+                if (result.Succeeded)
+                {
+                    _logger.LogInformation($"New user for {credentials.Login} registered");
+                    // установка куки
+                    await _userManager.AddToRoleAsync(user, "User");
+                    await _signInManager.SignInAsync(user, false);
+                    _logger.LogInformation($"New user for {credentials.Login} login");
+                    return RedirectToAction("UserInfo");
+                }
+                else
+                    return StatusCode(500, new { Errors = result.Errors.Select(e => e.Description) });
             }
-            else
-                return StatusCode(400, new { Errors = result.Errors.Select(e => e.Description) });
+            catch(Exception e)
+            {
+                return StatusCode(501, new { Errors = new List<string>() { e.Message } });
+            }
         }
 
         [HttpGet("UserInfo")]
