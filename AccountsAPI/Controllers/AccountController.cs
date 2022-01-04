@@ -208,7 +208,7 @@ namespace Bng.AccountsAPI.Controllers
             var cookieOptions = new CookieOptions
             {
                 HttpOnly = true,
-                Expires = DateTime.UtcNow.AddDays(7)
+                Expires = DateTime.UtcNow.Add(TimeSpan.Parse(Startup.Configuration["JWT:RefreshTokenLifetime"]))
             };
             Response.Cookies.Append("refreshToken", token, cookieOptions);
         }
