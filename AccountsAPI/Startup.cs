@@ -1,8 +1,11 @@
 using Bng.AccountsAPI.Contexts;
+using Bng.AccountsAPI.Helpers;
 using Bng.AccountsAPI.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.CookiePolicy;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -58,7 +61,8 @@ namespace Bng.AccountsAPI
                     builder
                     .WithOrigins(Configuration["ClientDomain"])
                     .AllowAnyMethod()
-                    .AllowAnyHeader()));
+                    .AllowAnyHeader()
+                    .AllowCredentials()));
 
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>
@@ -66,6 +70,8 @@ namespace Bng.AccountsAPI
                     var useHttpsStr = Configuration["UseHttps"];
                     var useHttps = useHttpsStr != null && bool.TryParse(useHttpsStr, out var result) && result;
                     options.RequireHttpsMetadata = useHttps;
+
+                    options.SaveToken = true;
 
                     var jwtConfig = Configuration.GetSection("JWT");
                     options.TokenValidationParameters = new TokenValidationParameters
@@ -88,6 +94,8 @@ namespace Bng.AccountsAPI
                         ValidateIssuerSigningKey = true
                     };
                 });
+
+            services.AddScoped<IAuthService, AuthService>();
 
             services.AddSwaggerGen(c =>
             {

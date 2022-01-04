@@ -16,6 +16,7 @@ using System.Security.Claims;
 using System.IdentityModel.Tokens.Jwt;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using Bng.AccountsAPI.Helpers;
 
 namespace Bng.AccountsAPI.Controllers
 {
@@ -28,70 +29,64 @@ namespace Bng.AccountsAPI.Controllers
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly AppDBContext _context;
         private readonly ILogger<AccountController> _logger;
-        public AccountController(UserManager<User> userManager, SignInManager<User> signInManager, 
-            RoleManager<IdentityRole> roleManager, AppDBContext context, ILogger<AccountController> logger)
+        private readonly IAuthService _authService;
+        public AccountController(UserManager<User> userManager, SignInManager<User> signInManager,
+            RoleManager<IdentityRole> roleManager, AppDBContext context, 
+            ILogger<AccountController> logger, IAuthService authService)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _roleManager = roleManager;
             _context = context;
             _logger = logger;
+            _authService = authService;
         }
 
-        [HttpPost("Token")]
-        public async Task<IActionResult> Token([FromBody] Credentials credentials)
+        [HttpPost("authenticate")]
+        public async Task<IActionResult> Authenticate([FromBody] Credentials credentials)
         {
-            var identity = await GetIdentity(credentials);
-            if (identity == null)
-            {
-                return BadRequest(new { errorText = "Invalid username or password." });
-            }
+            var response = await _authService.Authenticate(credentials, IpAddress());
 
-            var now = DateTime.UtcNow;
-            var jwtConfig = Startup.Configuration.GetSection("JWT");
-            // создаем JWT-токен
-            var jwt = new JwtSecurityToken(
-                    issuer: jwtConfig["Issuer"],
-                    audience: jwtConfig["Audience"],
-                    notBefore: now,
-                    claims: identity.Claims,
-                    expires: now.Add(TimeSpan.FromMinutes(int.Parse(jwtConfig["Lifetime"]))),
-                    signingCredentials: new SigningCredentials(new SymmetricSecurityKey(Encoding.ASCII.GetBytes(jwtConfig["Secret"])), 
-                    SecurityAlgorithms.HmacSha256));
-            var encodedJwt = new JwtSecurityTokenHandler().WriteToken(jwt);
+            if (response == null)
+                return BadRequest(new { message = "Username or password is incorrect" });
 
-            var response = new
-            {
-                access_token = encodedJwt,
-                username = identity.Name,
-                roles = identity.Claims.First(x => x.Type == ClaimsIdentity.DefaultRoleClaimType).Value
-            };
+            SetTokenCookie(response.RefreshToken);
 
             return Ok(response);
         }
 
-        private async Task<ClaimsIdentity> GetIdentity(Credentials credentials)
+        [HttpPost("refresh-token")]
+        public async Task<IActionResult> RefreshToken()
         {
-            var user = await _userManager.FindByNameAsync(credentials.Login);
-            if (user != null && await _userManager.CheckPasswordAsync(user, credentials.Password))
-            {
-                var roles = await _userManager.GetRolesAsync(user);
-                var claims = new List<Claim>
-                {
-                    new Claim(ClaimsIdentity.DefaultNameClaimType, user.UserName),
-                    new Claim(ClaimsIdentity.DefaultRoleClaimType, string.Join(", ", roles))
-                };
-                var claimsIdentity =
-                new ClaimsIdentity(claims, "Token", ClaimsIdentity.DefaultNameClaimType,
-                    ClaimsIdentity.DefaultRoleClaimType);
-                return claimsIdentity;
-            }
+            var refreshToken = Request.Cookies["refreshToken"];
+            var response = await _authService.RefreshToken(refreshToken, IpAddress());
 
-            // если пользователя не найдено
-            return null;
+            if (response == null)
+                return Unauthorized(new { message = "Invalid token" });
+
+            SetTokenCookie(response.RefreshToken);
+
+            return Ok(response);
         }
 
-        [HttpPost("ValidateToken")]
+        [HttpPost("revoke-token")]
+        public IActionResult RevokeToken([FromBody] RevokeTokenRequest model)
+        {
+            // accept token from request body or cookie
+            var token = model.Token ?? Request.Cookies["refreshToken"];
+
+            if (string.IsNullOrEmpty(token))
+                return BadRequest(new { message = "Token is required" });
+
+            var response = _authService.RevokeToken(token, IpAddress());
+
+            if (!response)
+                return NotFound(new { message = "Token not found" });
+
+            return Ok(new { message = "Token revoked" });
+        }
+
+        [HttpPost("validate-token")]
         public IActionResult ValidateJwtToken([FromBody] string token)
         {
             var jwtConfig = Startup.Configuration.GetSection("JWT");
@@ -113,13 +108,11 @@ namespace Bng.AccountsAPI.Controllers
                 var username = jwtToken.Claims.First(x => x.Type == ClaimsIdentity.DefaultNameClaimType).Value;
                 var roles = jwtToken.Claims.First(x => x.Type == ClaimsIdentity.DefaultRoleClaimType).Value;
 
-                // return account id from JWT token if validation successful
                 return Ok(new { username, roles });
             }
             catch (Exception e)
             {
                 _logger.LogError(e, "An error occured while validating token: ");
-                // return null if validation fails
                 return null;
             }
         }
@@ -208,6 +201,24 @@ namespace Bng.AccountsAPI.Controllers
                 gameSummaries,
                 catalogs
             };
+        }
+
+        private void SetTokenCookie(string token)
+        {
+            var cookieOptions = new CookieOptions
+            {
+                HttpOnly = true,
+                Expires = DateTime.UtcNow.AddDays(7)
+            };
+            Response.Cookies.Append("refreshToken", token, cookieOptions);
+        }
+
+        private string IpAddress()
+        {
+            if (Request.Headers.ContainsKey("X-Forwarded-For"))
+                return Request.Headers["X-Forwarded-For"];
+            else
+                return HttpContext.Connection.RemoteIpAddress.MapToIPv4().ToString();
         }
     }
 }
