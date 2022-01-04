@@ -1,5 +1,6 @@
 using Bng.AccountsAPI.Contexts;
 using Bng.AccountsAPI.Models;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -10,10 +11,12 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace Bng.AccountsAPI
@@ -57,6 +60,35 @@ namespace Bng.AccountsAPI
                     .AllowAnyMethod()
                     .AllowAnyHeader()));
 
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddJwtBearer(options =>
+                {
+                    var useHttpsStr = Configuration["UseHttps"];
+                    var useHttps = useHttpsStr != null && bool.TryParse(useHttpsStr, out var result) && result;
+                    options.RequireHttpsMetadata = useHttps;
+
+                    var jwtConfig = Configuration.GetSection("JWT");
+                    options.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        // укзывает, будет ли валидироваться издатель при валидации токена
+                        ValidateIssuer = true,
+                        // строка, представляющая издателя
+                        ValidIssuer = jwtConfig["Issuer"],
+
+                        // будет ли валидироваться потребитель токена
+                        ValidateAudience = true,
+                        // установка потребителя токена
+                        ValidAudience = jwtConfig["Audience"],
+                        // будет ли валидироваться время существования
+                        ValidateLifetime = true,
+
+                        // установка ключа безопасности
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(jwtConfig["Secret"])),
+                        // валидация ключа безопасности
+                        ValidateIssuerSigningKey = true
+                    };
+                });
+
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "AccountsAPI", Version = "v1" });
@@ -82,6 +114,7 @@ namespace Bng.AccountsAPI
             app.UseCors();
 
             app.UseAuthentication();
+            app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
             {
