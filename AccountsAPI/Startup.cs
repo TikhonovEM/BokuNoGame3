@@ -64,7 +64,11 @@ namespace Bng.AccountsAPI
                     .AllowAnyHeader()
                     .AllowCredentials()));
 
-            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
                 .AddJwtBearer(options =>
                 {
                     var useHttpsStr = Configuration["UseHttps"];

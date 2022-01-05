@@ -17,31 +17,26 @@ using System.IdentityModel.Tokens.Jwt;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Bng.AccountsAPI.Helpers;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Bng.AccountsAPI.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
-    public class AccountController : ControllerBase
+    public class AuthController : ControllerBase
     {
         private readonly UserManager<User> _userManager;
-        private readonly SignInManager<User> _signInManager;
-        private readonly RoleManager<IdentityRole> _roleManager;
-        private readonly AppDBContext _context;
-        private readonly ILogger<AccountController> _logger;
+        private readonly ILogger<AuthController> _logger;
         private readonly IAuthService _authService;
-        public AccountController(UserManager<User> userManager, SignInManager<User> signInManager,
-            RoleManager<IdentityRole> roleManager, AppDBContext context, 
-            ILogger<AccountController> logger, IAuthService authService)
+        public AuthController(UserManager<User> userManager, ILogger<AuthController> logger, IAuthService authService)
         {
             _userManager = userManager;
-            _signInManager = signInManager;
-            _roleManager = roleManager;
-            _context = context;
             _logger = logger;
             _authService = authService;
         }
 
+        [AllowAnonymous]
         [HttpPost("authenticate")]
         public async Task<IActionResult> Authenticate([FromBody] Credentials credentials)
         {
@@ -55,6 +50,7 @@ namespace Bng.AccountsAPI.Controllers
             return Ok(response);
         }
 
+        [AllowAnonymous]
         [HttpPost("refresh-token")]
         public async Task<IActionResult> RefreshToken()
         {
@@ -117,29 +113,8 @@ namespace Bng.AccountsAPI.Controllers
             }
         }
 
-        [HttpPost("Login")]
-        public async Task<IActionResult> Login(Credentials credentials)
-        {
-            _logger.LogInformation($"Start login for {credentials.Login}");
-            var result =
-                await _signInManager.PasswordSignInAsync(credentials.Login, credentials.Password, credentials.RememberMe, false);
-            if (result.Succeeded)
-            {
-                _logger.LogInformation($"Successful login for {credentials.Login}");
-                return RedirectToAction("UserInfo");
-            }
-
-            return StatusCode(400);
-        }
-
-        [HttpPost("Logout")]
-        public async Task<IActionResult> Logout()
-        {
-            await _signInManager.SignOutAsync();
-            return Ok();
-        }
-
-        [HttpPost("Register")]
+        [AllowAnonymous]
+        [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] Credentials credentials)
         {
             try
@@ -151,12 +126,14 @@ namespace Bng.AccountsAPI.Controllers
                 var result = await _userManager.CreateAsync(user, credentials.Password);
                 if (result.Succeeded)
                 {
-                    _logger.LogInformation($"New user for {credentials.Login} registered");
+                    _logger.LogInformation($"New user for {credentials.Login} registered");                    
+                    
                     // установка куки
                     await _userManager.AddToRoleAsync(user, "User");
-                    await _signInManager.SignInAsync(user, false);
-                    _logger.LogInformation($"New user for {credentials.Login} login");
-                    return RedirectToAction("UserInfo");
+                    var response = await _authService.Authenticate(credentials, IpAddress());
+                    SetTokenCookie(response.RefreshToken);
+
+                    return Ok(response);
                 }
                 else
                     return StatusCode(500, new { Errors = result.Errors.Select(e => e.Description) });
@@ -165,42 +142,6 @@ namespace Bng.AccountsAPI.Controllers
             {
                 return StatusCode(501, new { Errors = new List<string>() { e.Message } });
             }
-        }
-
-        [HttpGet("UserInfo")]
-        public async Task<object> UserInfo()
-        {
-            var roles = new List<string>();
-            var user = await _userManager.GetUserAsync(User);
-            if (user != null)
-                roles.AddRange(await _userManager.GetRolesAsync(user));
-            return new
-            {
-                IsSignedIn = _signInManager.IsSignedIn(User),
-                Roles = roles,
-                UserId = user?.Id,
-                UserNickname = user?.Nickname
-            };
-        }
-
-        [HttpGet("{username?}")]
-        public async Task<object> Profile(string username)
-        {
-            var user = username != null && !username.Equals("undefined") ? await _userManager.FindByNameAsync(username) : await _userManager.GetUserAsync(User);
-
-            using var client = new HttpClient();
-            client.BaseAddress = new Uri(Startup.Configuration["GamesAPIBaseAddress"]);
-
-            var gameSummaries = JsonConvert.DeserializeObject<List<GameSummary>>(await client.GetStringAsync($"/api/GameSummary/User/{user.Id}"));
-
-            var catalogs = JsonConvert.DeserializeObject<List<Catalog>>(await client.GetStringAsync("/api/Catalog/All"));
-
-            return new
-            {
-                user,
-                gameSummaries,
-                catalogs
-            };
         }
 
         private void SetTokenCookie(string token)

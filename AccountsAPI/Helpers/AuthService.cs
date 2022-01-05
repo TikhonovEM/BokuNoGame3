@@ -77,7 +77,7 @@ namespace Bng.AccountsAPI.Helpers
 
         public bool RevokeToken(string token, string ipAddress)
         {
-            var user = _context.Users.SingleOrDefault(u => u.RefreshTokens.Any(t => t.Token == token));
+            var user = _context.Users.Include(u => u.RefreshTokens).SingleOrDefault(u => u.RefreshTokens.Any(t => t.Token == token));
 
             // return false if no user found with token
             if (user == null) return false;
