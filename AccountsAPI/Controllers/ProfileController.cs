@@ -39,7 +39,17 @@ namespace Bng.AccountsAPI.Controllers
 
             return new
             {
-                user,
+                user = new
+                {
+                    user.BirthDate,
+                    user.Email,
+                    user.FullName,
+                    user.Nickname,
+                    user.PhoneNumber,
+                    user.Photo,
+                    user.RegistrationDate,
+                    user.UserName
+                },
                 gameSummaries,
                 catalogs
             };
