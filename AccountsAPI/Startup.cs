@@ -1,7 +1,11 @@
 using Bng.AccountsAPI.Contexts;
+using Bng.AccountsAPI.Helpers;
 using Bng.AccountsAPI.Models;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.CookiePolicy;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -10,10 +14,12 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace Bng.AccountsAPI
@@ -55,7 +61,45 @@ namespace Bng.AccountsAPI
                     builder
                     .WithOrigins(Configuration["ClientDomain"])
                     .AllowAnyMethod()
-                    .AllowAnyHeader()));
+                    .AllowAnyHeader()
+                    .AllowCredentials()));
+
+            services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+                .AddJwtBearer(options =>
+                {
+                    var useHttpsStr = Configuration["UseHttps"];
+                    var useHttps = useHttpsStr != null && bool.TryParse(useHttpsStr, out var result) && result;
+                    options.RequireHttpsMetadata = useHttps;
+
+                    options.SaveToken = true;
+
+                    var jwtConfig = Configuration.GetSection("JWT");
+                    options.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        // укзывает, будет ли валидироваться издатель при валидации токена
+                        ValidateIssuer = true,
+                        // строка, представляющая издателя
+                        ValidIssuer = jwtConfig["Issuer"],
+
+                        // будет ли валидироваться потребитель токена
+                        ValidateAudience = true,
+                        // установка потребителя токена
+                        ValidAudience = jwtConfig["Audience"],
+                        // будет ли валидироваться время существования
+                        ValidateLifetime = true,
+
+                        // установка ключа безопасности
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(jwtConfig["Secret"])),
+                        // валидация ключа безопасности
+                        ValidateIssuerSigningKey = true
+                    };
+                });
+
+            services.AddScoped<IAuthService, AuthService>();
 
             services.AddSwaggerGen(c =>
             {
@@ -82,6 +126,7 @@ namespace Bng.AccountsAPI
             app.UseCors();
 
             app.UseAuthentication();
+            app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
             {

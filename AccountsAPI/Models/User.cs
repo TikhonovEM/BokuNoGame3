@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace Bng.AccountsAPI.Models
@@ -13,5 +14,7 @@ namespace Bng.AccountsAPI.Models
         public DateTime BirthDate { get; set; }
         public DateTime RegistrationDate { get; set; }
         public byte[] Photo { get; set; }
+        [JsonIgnore]
+        public List<RefreshToken> RefreshTokens { get; set; }
     }
 }
