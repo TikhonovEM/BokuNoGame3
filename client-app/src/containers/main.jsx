@@ -1,7 +1,6 @@
 ﻿import React from 'react';
 import ReactDOM from 'react-dom';
 import { NavLink } from 'react-router-dom';
-import { bng_games_fetch } from '../js/site';
 import GlobalNews from './globalnews';
 import LocalNews from './localnews';
 import TopGames from './topgames';

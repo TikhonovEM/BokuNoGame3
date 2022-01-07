@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { bng_games_fetch } from '../js/site';
+import api from '../services/api';
 
 const LocalNews = (props) => {
     const [localNews, setLocalNews] = useState(
@@ -9,11 +9,13 @@ const LocalNews = (props) => {
         });
 
     const getNews = () => {
-        bng_games_fetch("/api/News/Query?$filter=isLocal eq true", {method: "GET"})
-        .then(res => res.json())
-        .then((result) => setLocalNews({
-            data: result,
-            isFetching: false
+        api.bng_games_fetch({
+            url: "/api/News/Query?$filter=isLocal eq true",
+            method: "GET"
+        })
+        .then(res => setLocalNews({
+                data: res.data,
+                isFetching: false
         }));
     };
 

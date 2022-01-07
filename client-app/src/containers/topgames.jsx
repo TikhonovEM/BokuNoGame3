@@ -1,20 +1,22 @@
 import React, { useEffect, useState } from 'react';
-import { bng_games_fetch } from '../js/site';
+import api from '../services/api';
 import { NavLink } from 'react-router-dom';
 
 const TopGames = (props) => {
-    const [games, getGames] = useState(
+    const [games, setGames] = useState(
         {
             data: {},
             isFetching: true
         });
 
     useEffect(() => {
-        bng_games_fetch("/api/Game/MostPopular?top=8", {method: "GET"})
-        .then(res => res.json())
-        .then((result) => getGames({
-            data: result,
-            isFetching: false
+        api.bng_games_fetch({
+            url: "/api/Game/MostPopular?top=8",
+            method: "GET"
+        })
+        .then(res => setGames({
+                data: res.data,
+                isFetching: false
         }));
     }, []);
 

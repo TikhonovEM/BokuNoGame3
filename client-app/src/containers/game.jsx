@@ -1,7 +1,7 @@
 ﻿import React, { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom';
 import { BrowserRouter as Router, Route, Switch, useParams } from 'react-router-dom';
-import { bng_games_fetch } from '../js/site'
+import api from '../services/api'
 
 const Game = (props) => {
 
@@ -14,6 +14,7 @@ const Game = (props) => {
 
     useEffect(() => {
         const opts = {
+            url: "/api/Game/" + params.gameId,
             method: 'GET',
             headers: {
                 'Accept': 'application/json',
@@ -21,13 +22,15 @@ const Game = (props) => {
                 'Accept-Encoding': 'gzip;q=1.0, compress;q=0.5'
             }
         };
-        bng_games_fetch("/api/Game/" + params.gameId, opts)
+        const response = api.bng_games_fetch(opts);
+        console.log();
+        /*api.bng_games_fetch("/api/Game/" + params.gameId, opts)
             .then(res => res.json())
             .then((result) => setPageState(
                 {
                     game: result,
                     isFetching: false
-                }));
+                }));*/
     }, []);
 
     if (pageState.isFetching)
