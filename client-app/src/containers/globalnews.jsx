@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Button, Modal, Form } from 'react-bootstrap';
-import { bng_games_fetch } from '../js/site';
-import 'bootstrap-dark-5/dist/css/bootstrap-dark.min.css'
+import api from '../services/api';
 
 const GlobalNews = (props) => {
     const [globalNews, setGlobalNews] = useState(
@@ -18,11 +17,13 @@ const GlobalNews = (props) => {
     const handleShow = () => setShow(true);
 
     const getNews = () => {
-        bng_games_fetch("/api/News/Query?$filter=isLocal eq false", {method: "GET"})
-        .then(res => res.json())
-        .then((result) => setGlobalNews({
-            data: result,
-            isFetching: false
+        api.bng_games_fetch({
+            url: "/api/News/Query?$filter=isLocal eq false",
+            method: "GET"
+        })
+        .then(res => setGlobalNews({
+                data: res.data,
+                isFetching: false
         }));
     };
 
@@ -34,22 +35,24 @@ const GlobalNews = (props) => {
         handleClose();
 
         var opts = {
+            url: "/api/News",
             method: "POST",
-            body: JSON.stringify({
+            data: {
                 title: title,
                 text: text,
                 reference: reference,
                 isLocal: isLocal
-            }),
+            },
             headers: {
                 'Content-Type': 'application/json'
             }
         }
-        bng_games_fetch("/api/News", opts).then(response => {
-            if (response.status == 200) {
+        api.bng_games_fetch(opts)
+        .then(res => {
+            if (res.status == 200) {
                 getNews();
             }
-        });
+        })
     }
 
     if (globalNews.isFetching)

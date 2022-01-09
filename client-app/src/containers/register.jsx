@@ -1,7 +1,7 @@
 ﻿import React from 'react';
 import { Navigate } from 'react-router-dom';
 import './css/register.css';
-import { bng_accounts_fetch } from '../js/site';
+import api from '../services/api';
 
 export default class Register extends React.Component {
     constructor(props) {
@@ -23,7 +23,7 @@ export default class Register extends React.Component {
         this.setState({ [name]: value });
     }
 
-    submitHandler(event) {
+    async submitHandler(event) {
         event.preventDefault();
         const validation = document.getElementById("validation");
 
@@ -32,28 +32,14 @@ export default class Register extends React.Component {
             return;
         }
 
-        bng_accounts_fetch("/api/Account/Register", {
-            method: "POST",
-            body: JSON.stringify({
-                'login': this.state.login,
-                'password': this.state.password
-            }),
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        }).then(response => {
-            if (response.status == 200) {
-                response.json().then(res => {
-                    localStorage.setItem("userInfo", JSON.stringify(res));
-                    this.setState({ redirect: true });
-                })
-            }
-            else {               
-                response.json().then(res => {
-                    validation.innerText = res.errors.join('\n');
-                })
-            }
-        });
+        const result = await api.register(this.state.login, this.state.password);
+        if (result.successful) {
+            this.setState({ redirect: true });
+        }
+        else {
+            validation.innerText = result.errors.join('\n');
+        }
+
     }
 
     render() {

@@ -8,6 +8,7 @@ import Game from './game.jsx';
 import Login from './login.jsx'
 import Register from './register.jsx'
 import Profile from './profile.jsx'
+import 'bootstrap-dark-5/dist/css/bootstrap-dark.min.css'
 
 export default class App extends React.Component {
     render() {

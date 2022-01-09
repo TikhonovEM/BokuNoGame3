@@ -1,7 +1,7 @@
 ﻿import React from 'react';
 import { NavLink, Navigate } from 'react-router-dom';
 import './css/login.css';
-import { bng_accounts_fetch } from '../js/site';
+import api from '../services/api';
 
 export default class Login extends React.Component {
     constructor(props) {
@@ -23,31 +23,17 @@ export default class Login extends React.Component {
         this.setState({ [name]: value });
     }
 
-    submitHandler(event) {
+    async submitHandler(event) {
         event.preventDefault();
-        bng_accounts_fetch("/api/Account/Login", {
-            method: "POST",
-            body: JSON.stringify({
-                'login': this.state.login,
-                'password': this.state.password,
-                'rememberMe': this.state.rememberMe
-            }),
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        }).then(response => {
-            if (response.status == 200) {                
-                response.json().then(res => {
-                    localStorage.setItem("userInfo", JSON.stringify(res));
-                    this.setState({ redirect: true });
-                })
-            }
-        });
+        let result = await api.login(this.state.login, this.state.password, this.state.rememberMe);
+        if (result.successful) {
+            this.setState({ redirect: true });
+        }
     }
 
     render() {
         if (this.state.redirect)
-            return (<Navigate push to='/' />);
+            return (<Navigate to='/' replace={true} />);
         return (
             <div id="logreg-forms">
                 <div className="card rounded-0">
