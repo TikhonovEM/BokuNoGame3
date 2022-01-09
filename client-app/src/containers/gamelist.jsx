@@ -31,10 +31,7 @@ export default class GameList extends React.Component {
         })
         const opts = {
             method: 'POST',
-            body: JSON.stringify(this.filter),
-            headers: {
-                'Content-Type': 'application/json'
-            }
+            body: JSON.stringify(this.filter)
         };
 
         console.log(opts.body);

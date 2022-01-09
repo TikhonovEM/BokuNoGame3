@@ -15,22 +15,13 @@ const Game = (props) => {
     useEffect(() => {
         const opts = {
             url: "/api/Game/" + params.gameId,
-            method: 'GET',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json',
-                'Accept-Encoding': 'gzip;q=1.0, compress;q=0.5'
-            }
+            method: 'GET'
         };
-        const response = api.bng_games_fetch(opts);
-        console.log();
-        /*api.bng_games_fetch("/api/Game/" + params.gameId, opts)
-            .then(res => res.json())
-            .then((result) => setPageState(
-                {
-                    game: result,
-                    isFetching: false
-                }));*/
+        api.bng_games_fetch(opts)
+        .then(res => setPageState({
+            game: res.data,
+            isFetching: false
+        }));
     }, []);
 
     if (pageState.isFetching)

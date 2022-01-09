@@ -42,9 +42,6 @@ const GlobalNews = (props) => {
                 text: text,
                 reference: reference,
                 isLocal: isLocal
-            },
-            headers: {
-                'Content-Type': 'application/json'
             }
         }
         api.bng_games_fetch(opts)
