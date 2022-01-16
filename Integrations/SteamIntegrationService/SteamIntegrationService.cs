@@ -79,6 +79,8 @@ namespace Bng.SteamIntegrationService
                 var lang = "russian";
                 foreach (var app in appInfoList)
                 {
+                    _logger.LogDebug($"Start process appInfo with Id = {app.AppId}");
+                    _logger.LogDebug($"App with Id = {app.AppId} already exists = {ids.Contains((int)app.AppId)} (count = {ids.Count(id => id == app.AppId)})");
                     var hasErrors = false;
                     StoreAppDetailsDataModel appDetails = null;
                     try
@@ -144,6 +146,7 @@ namespace Bng.SteamIntegrationService
                 _logger.LogInformation("Start migration to DB");
                 foreach (var appDetail in AppDetails)
                 {
+                    _logger.LogDebug($"Start process app with externalId = {appDetail.SteamAppId}");
                     try
                     {
                         var game = new Game();
@@ -190,7 +193,8 @@ namespace Bng.SteamIntegrationService
                                 }
                                 catch (Exception e)
                                 {
-                                    _logger.LogError(e, "Error while send request to date_converter");
+                                    if (e is not HttpRequestException)
+                                        _logger.LogError(e, "Error while send request to date_converter");
                                 }
                                 game.ReleaseDate = DateTime.Parse(releaseDateStr);
                             }
