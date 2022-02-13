@@ -10,24 +10,24 @@ import Register from './register.jsx'
 import Profile from './profile.jsx'
 import 'bootstrap-dark-5/dist/css/bootstrap-dark.min.css'
 
-export default class App extends React.Component {
-    render() {
-        return (
-            <div>
-                <Header />
-                <div className="container-fluid">                   
-                    <main role="main" className="pb-3">
-                        <Routes>
-                            <Route path='/' exact element={<MainPage />} ></Route>
-                            <Route path='/Account/Register' element={<Register />} ></Route>
-                            <Route path='/Account/Login' element={<Login />} ></Route>
-                            <Route path='/GameList' element={<GameList />} ></Route>
-                            <Route path='/Game/:gameId' element={<Game />} ></Route>
-                            <Route path='/Account/Profile/:userName?' element={<Profile />} ></Route>
-                        </Routes>
-                    </main>                   
-                </div>
+const App = (props) => {
+    return (
+        <div>
+            <Header />
+            <div className="container-fluid">                   
+                <main role="main" className="pb-3">
+                    <Routes>
+                        <Route path='/' exact element={<MainPage />} ></Route>
+                        <Route path='/Account/Register' element={<Register />} ></Route>
+                        <Route path='/Account/Login' element={<Login />} ></Route>
+                        <Route path='/GameList' element={<GameList />} ></Route>
+                        <Route path='/Game/:gameId' element={<Game />} ></Route>
+                        <Route path='/Account/Profile/:userName?' element={<Profile />} ></Route>
+                    </Routes>
+                </main>                   
             </div>
-        );
-    }
+        </div>
+    );
 };
+
+export default App;

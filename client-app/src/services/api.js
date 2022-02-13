@@ -70,9 +70,17 @@ class Api {
     }
 
     async logout() {
-        let response = await axios.post(config.Addressees.AccountsAPI + "/api/auth/revoke-token", {
+        const opts = {
+            headers: {
+                Authorization: 'Bearer ' + userinfoService.getInfo().jwtToken
+            },
+            data: {
+                token: null
+            },
             withCredentials: true
-        });
+        };
+        console.log(opts);
+        let response = await axios.post(config.Addressees.AccountsAPI + "/api/auth/revoke-token", opts);
         if (response.status == 200) {
             userinfoService.deleteInfo();
             this._stopRefreshTokenTimer();
