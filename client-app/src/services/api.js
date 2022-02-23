@@ -31,9 +31,7 @@ class Api {
     
     async refreshToken() {
         console.log("start refresh");
-        let response = await axios.post(config.Addressees.AccountsAPI + "/api/auth/refresh-token", {
-            withCredentials: true
-        });
+        let response = await axios.post(config.Addressees.AccountsAPI + "/api/auth/refresh-token");
 
         if (response.status == 200) {
             this._startRefreshTokenTimer();
@@ -70,17 +68,21 @@ class Api {
     }
 
     async logout() {
-        const opts = {
-            headers: {
-                Authorization: 'Bearer ' + userinfoService.getInfo().jwtToken
-            },
+        const opts = {            
             data: {
                 token: null
-            },
-            withCredentials: true
+            }          
         };
+        const axios_config =  {
+            withCredentials: true,
+            headers: {                
+                Authorization: 'Bearer ' + userinfoService.getInfo().jwtToken,
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Credentials': true
+            }
+        }
         console.log(opts);
-        let response = await axios.post(config.Addressees.AccountsAPI + "/api/auth/revoke-token", opts);
+        let response = await axios.post(config.Addressees.AccountsAPI + "/api/auth/revoke-token", JSON.stringify(opts), axios_config);
         if (response.status == 200) {
             userinfoService.deleteInfo();
             this._stopRefreshTokenTimer();

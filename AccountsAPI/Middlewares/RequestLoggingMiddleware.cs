@@ -28,11 +28,9 @@ namespace Bng.AccountsAPI.Middlewares
             finally
             {
                 _logger.LogInformation(
-                    "Request {method} {url} {headers} {body} => {statusCode}",
+                    "Request {method} {url} => {statusCode}",
                     context.Request?.Method,
                     context.Request?.Path.Value,
-                    JsonConvert.SerializeObject(context.Request?.Headers),
-                    JsonConvert.SerializeObject(context.Request?.Cookies),
                     context.Response?.StatusCode);
             }
         }
