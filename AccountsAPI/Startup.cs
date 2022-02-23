@@ -1,5 +1,6 @@
 using Bng.AccountsAPI.Contexts;
 using Bng.AccountsAPI.Helpers;
+using Bng.AccountsAPI.Middlewares;
 using Bng.AccountsAPI.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
@@ -110,6 +111,8 @@ namespace Bng.AccountsAPI
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            app.UseMiddleware<RequestLoggingMiddleware>();
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
