@@ -2,6 +2,8 @@ import axios from "axios";
 import config from './config.json';
 import userinfoService from "./userinfo.service";
 
+axios.defaults.headers.common['Content-Type'] = 'application/json'
+
 class Api {
     async login(login, password, rememberMe) {
         let result = {};
@@ -30,8 +32,10 @@ class Api {
     }
     
     async refreshToken() {
-        console.log("start refresh");
-        let response = await axios.post(config.Addressees.AccountsAPI + "/api/auth/refresh-token");
+        const data = {            
+            token: userinfoService.getInfo().refreshToken
+        };
+        let response = await axios.post(config.Addressees.AccountsAPI + "/api/auth/refresh-token", data);
 
         if (response.status == 200) {
             this._startRefreshTokenTimer();
@@ -68,21 +72,17 @@ class Api {
     }
 
     async logout() {
-        const opts = {            
-            data: {
-                token: null
-            }          
+        const userInfo = userinfoService.getInfo();
+        const data = {            
+            token: userInfo.refreshToken       
         };
         const axios_config =  {
             withCredentials: true,
             headers: {                
-                Authorization: 'Bearer ' + userinfoService.getInfo().jwtToken,
-                'Content-Type': 'application/json',
-                'Access-Control-Allow-Credentials': true
+                Authorization: 'Bearer ' + userInfo.jwtToken
             }
         }
-        console.log(opts);
-        let response = await axios.post(config.Addressees.AccountsAPI + "/api/auth/revoke-token", JSON.stringify(opts), axios_config);
+        let response = await axios.post(config.Addressees.AccountsAPI + "/api/auth/revoke-token", data, axios_config);
         if (response.status == 200) {
             userinfoService.deleteInfo();
             this._stopRefreshTokenTimer();

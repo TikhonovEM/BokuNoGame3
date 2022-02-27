@@ -1,10 +1,14 @@
-﻿import React from 'react';
+﻿import React, { useState } from 'react';
 import ReactDOM from 'react-dom';
 import { BrowserRouter as Router, Route, Switch, NavLink } from 'react-router-dom';
 import api from '../services/api';
 import userinfoService from '../services/userinfo.service';
 
 const Header = (props) => {
+    const [_, setRefresh] = useState();
+    const logout = () => {
+        api.logout().then(() => setRefresh(true));
+    }
     const userInfo = userinfoService.getInfo();
     return (
         <header>
@@ -29,7 +33,7 @@ const Header = (props) => {
                                         <NavLink to='/Account/Profile' className="nav-link text-info">Профиль</NavLink>
                                     </li>
                                     <li className="nav-item">
-                                        <button type="button" className="nav-link btn btn-link text-info" onClick={e => api.logout()}>Выйти</button>
+                                        <button type="button" className="nav-link btn btn-link text-info" onClick={e => logout()}>Выйти</button>
                                     </li>
                                 </ul>
                                 : <ul className="navbar-nav">

@@ -52,9 +52,9 @@ namespace Bng.AccountsAPI.Controllers
 
         [AllowAnonymous]
         [HttpPost("refresh-token")]
-        public async Task<IActionResult> RefreshToken()
+        public async Task<IActionResult> RefreshToken([FromBody] RevokeTokenRequest model)
         {
-            var refreshToken = Request.Cookies["refreshToken"];
+            var refreshToken = model.Token ?? Request.Cookies["refreshToken"];
             var response = await _authService.RefreshToken(refreshToken, IpAddress());
 
             if (response == null)
