@@ -22,7 +22,7 @@ const App = (props) => {
                         <Route path='/Account/Login' element={<Login />} ></Route>
                         <Route path='/GameList' element={<GameList />} ></Route>
                         <Route path='/Game/:gameId' element={<Game />} ></Route>
-                        <Route path='/Account/Profile/:userName?' element={<Profile />} ></Route>
+                        <Route path='/Profile/:username' element={<Profile />} ></Route>
                     </Routes>
                 </main>                   
             </div>

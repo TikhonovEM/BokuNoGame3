@@ -5,10 +5,11 @@ import api from '../services/api';
 import userinfoService from '../services/userinfo.service';
 
 const Header = (props) => {
-    const [_, setRefresh] = useState();
-    const logout = () => {
-        api.logout().then(() => setRefresh(true));
+    const logout = async () => {
+        await api.logout();
+        document.location = '/';
     }
+
     const userInfo = userinfoService.getInfo();
     return (
         <header>
@@ -30,7 +31,7 @@ const Header = (props) => {
                                         </li>
                                     }
                                     <li className="nav-item">
-                                        <NavLink to='/Account/Profile' className="nav-link text-info">Профиль</NavLink>
+                                        <NavLink to={'/Profile/' + userInfo.username} className="nav-link text-info">Профиль</NavLink>
                                     </li>
                                     <li className="nav-item">
                                         <button type="button" className="nav-link btn btn-link text-info" onClick={e => logout()}>Выйти</button>
@@ -70,6 +71,6 @@ const Header = (props) => {
             </nav>
         </header>
     );
-    };
+};
 
 export default Header;

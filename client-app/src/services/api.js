@@ -94,6 +94,11 @@ class Api {
         return axios.request(opts);
     }
 
+    bng_accounts_fetch(opts) {
+        opts.baseURL = config.Addressees.AccountsAPI;
+        return axios.request(opts);
+    }
+
     _refreshTokenTimeout;
 
     _startRefreshTokenTimer() {
