@@ -11,6 +11,7 @@ using SteamWebAPI2.Interfaces;
 using Bng.Shared.Models;
 using System.Net.Http;
 using Newtonsoft.Json;
+using System.Globalization;
 
 namespace Bng.SteamIntegrationService
 {
@@ -42,8 +43,15 @@ namespace Bng.SteamIntegrationService
 
         public override async Task DoWork(CancellationToken cancellationToken)
         {
-            await GetActualDataAsync();
-            await SaveChangesAsync();
+            try
+            {
+                await GetActualDataAsync();
+                await SaveChangesAsync();
+            }
+            finally
+            {
+                AppDetails.Clear();
+            }
         }
 
         public async Task GetActualDataAsync()
@@ -139,8 +147,6 @@ namespace Bng.SteamIntegrationService
         {
             try
             {
-
-
                 _logger.LogInformation("Start migration to DB");
                 foreach (var appDetail in AppDetails)
                 {
@@ -174,7 +180,12 @@ namespace Bng.SteamIntegrationService
                         if (DateTime.TryParse(appDetail.ReleaseDate.Date, out var result))
                         {
                             game.ReleaseDate = result;
-                        }                        
+                        }
+                        else if (DateTime.TryParseExact(appDetail.ReleaseDate.Date, DateTimeParseHelper.AvailableFormats, 
+                            CultureInfo.InvariantCulture, DateTimeStyles.None, out result))
+                        {
+                            game.ReleaseDate = result;
+                        }
                         else
                         {
                             using (var httpClient = new HttpClient())
@@ -193,7 +204,8 @@ namespace Bng.SteamIntegrationService
                                     if (e is not HttpRequestException)
                                         _logger.LogError(e, "Error while send request to date_converter");
                                 }
-                                game.ReleaseDate = DateTime.Parse(releaseDateStr);
+                                game.ReleaseDate = DateTime.ParseExact(releaseDateStr, DateTimeParseHelper.AvailableFormats, 
+                                    CultureInfo.InvariantCulture, DateTimeStyles.None);
                             }
                         }
                         game.AgeRating = appDetail.RequiredAge.ToString();
@@ -245,8 +257,7 @@ namespace Bng.SteamIntegrationService
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Exception while save actual data from Steam.");
-            }
-            AppDetails.Clear();
+            }            
         }
     }
 }
