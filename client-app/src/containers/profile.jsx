@@ -1,8 +1,9 @@
 ﻿import React, { useEffect, useState } from 'react';
-import { alignPropType } from 'react-bootstrap/esm/types';
 import { useParams } from 'react-router-dom';
 import userinfoService from '../services/userinfo.service';
 import api from '../services/api';
+import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
+import 'react-tabs/style/react-tabs.css';
 
 const Profile = (props) => {
 
@@ -61,10 +62,10 @@ const Profile = (props) => {
         fetch("/api/Account/EditProfile", {
             method: "POST",
             body: JSON.stringify({
-                "nickname": this.state.nickname,
-                "fullName": this.state.fullName,
-                "email": this.state.email,
-                "birthDate": this.state.birthDate === "" ? null : this.state.birthDate
+                "nickname": nickname,
+                "fullName": fullName,
+                "email": email,
+                "birthDate": birthDate === "" ? null : birthDate
             }),
             headers: {
                 'Content-Type': 'application/json'
@@ -111,19 +112,14 @@ const Profile = (props) => {
                             <h6>
                                 Профиль
                             </h6>
-                            <ul className="nav nav-tabs" id="myTab" role="tablist">
-                                <li className="nav-item">
-                                    <a className="nav-link active" id="home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="home" aria-selected="true">Основная информация</a>
-                                </li>
-                                <li className="nav-item">
-                                    <a className="nav-link" id="profile-tab" data-toggle="tab" href="#profile" role="tab" aria-controls="profile" aria-selected="false">Дополнительно</a>
-                                </li>
-                            </ul>
-                        </div>
-                        <div className="row">
-                            <div className="col-md-12">
-                                <div className="tab-content profile-tab" id="myTabContent">
-                                    <div className="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
+                            <Tabs>
+                                <TabList>
+                                    <Tab style={{minWidth: "50%"}}>Основная информация</Tab>
+                                    <Tab style={{minWidth: "50%"}}>Дополнительно</Tab>
+                                </TabList>
+
+                                <TabPanel>
+                                    <div>
                                         <div className="row">
                                             <div className="col-md-6">
                                                 <label>User Id</label>
@@ -157,7 +153,9 @@ const Profile = (props) => {
                                             </div>
                                         </div>
                                     </div>
-                                    <div className="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">
+                                </TabPanel>
+                                <TabPanel>
+                                    <div>
                                         <div className="row">
                                             <div className="col-md-6">
                                                 <label>С нами с </label>
@@ -183,8 +181,8 @@ const Profile = (props) => {
                                             </div>
                                         </div>
                                     </div>
-                                </div>
-                            </div>
+                                </TabPanel>
+                            </Tabs>
                         </div>
                     </div>
                     {(userInfo != null && userInfo.username === params.username) &&
@@ -235,7 +233,7 @@ const Profile = (props) => {
                                                 <div className="form-group row">
                                                     <label htmlFor="birthDate" className="col-sm-4 col-form-label">Дата рождения</label>
                                                     <div className="col-sm-3">
-                                                        <input type="date" name="birthDate" name="birthDate" onInput={e => setBirthDate(e.target.value)} />
+                                                        <input type="date" id="birthDate" name="birthDate" onInput={e => setBirthDate(e.target.value)} />
                                                     </div>
                                                 </div>
                                             </div>
@@ -252,37 +250,39 @@ const Profile = (props) => {
                 </div>
 
                 <br />
-                <ul className="nav nav-tabs nav-fill" id="listTab" role="tablist">
-                    {pageState.data.catalogs.map(function (value, index, array) {
-                        return (
-                            (value.id == 2)
-                                ? <li className="nav-item" key={index}>
-                                    <a className="nav-link active" id={value.id + "-tab"} data-toggle="tab" href={"#" + value.id} role="tab" aria-controls={value.id} aria-selected="true" >{value.name}</a>
-                                </li>
-                                : <li className="nav-item" key={index}>
-                                    <a className="nav-link" id={value.id + "-tab"} data-toggle="tab" href={"#" + value.id} role="tab" aria-controls={value.id} aria-selected="true" >{value.name}</a>
-                                </li>
-                        );
-                    })
-                    }
-                </ul>
-                <div style={{ width: "90%", margin: "0 auto" }}>
-                    <table id="userGameSummaries" className="table table-striped table-bordered dt-responsive nowrap" width="100%" cellSpacing="0">
-                        <thead>
-                            <tr>
-                                <th>Id</th>
-                                <th>GameId</th>
-                                <th>GameName</th>
-                                <th>Genre</th>
-                                <th>Rate</th>
-                                <th>Open</th>
-                                <th>Delete</th>
-                            </tr>
-                        </thead>
-                    </table>
-                </div>
+                <Tabs defaultIndex={1}>
+                    <TabList>
+                        {pageState.data.catalogs.map(function (value, index, array) {
+                            return (<Tab style={{minWidth: `${100 / array.length}%`}} key={index}>{value.name}</Tab>);
+                        })
+                        }
+                    </TabList>
 
-            </div >
+                    {pageState.data.catalogs.map(function (value, index, array) {
+                            return (
+                                <TabPanel key={index}></TabPanel>
+                            );
+                        })
+                    }
+
+                    <div style={{ width: "90%", margin: "0 auto" }}>
+                        <table id="userGameSummaries" className="table table-striped table-bordered dt-responsive nowrap" width="100%" cellSpacing="0">
+                            <thead>
+                                <tr>
+                                    <th>Id</th>
+                                    <th>GameId</th>
+                                    <th>GameName</th>
+                                    <th>Genre</th>
+                                    <th>Rate</th>
+                                    <th>Open</th>
+                                    <th>Delete</th>
+                                </tr>
+                            </thead>
+                        </table>
+                    </div>
+                </Tabs>               
+
+            </div>
         );
 }
 export default Profile;
