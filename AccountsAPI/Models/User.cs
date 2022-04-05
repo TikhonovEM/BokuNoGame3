@@ -16,5 +16,10 @@ namespace Bng.AccountsAPI.Models
         public byte[] Photo { get; set; }
         [JsonIgnore]
         public List<RefreshToken> RefreshTokens { get; set; }
+
+        public User()
+        {
+            RegistrationDate = DateTime.Now;
+        }
     }
 }
