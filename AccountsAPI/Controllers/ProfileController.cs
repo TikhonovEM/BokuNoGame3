@@ -54,5 +54,23 @@ namespace Bng.AccountsAPI.Controllers
                 catalogs
             };
         }
+
+        [AllowAnonymous]
+        [HttpGet("UserInfo/{id?}")]
+        public async Task<object> UserInfo(string id)
+        {
+            var user = await _userManager.FindByIdAsync(id);
+
+            if (user == null)
+                return BadRequest(new { ErrorMessage = $"User with Id = '{id}' not found" });
+
+            return new
+            {
+                user.Id,
+                user.UserName,
+                user.Nickname,
+                user.Photo
+            };
+        }
     }
 }
