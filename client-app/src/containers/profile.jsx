@@ -4,6 +4,7 @@ import userinfoService from '../services/userinfo.service';
 import api from '../services/api';
 import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
 import 'react-tabs/style/react-tabs.css';
+import UserLibrary from './userlibrary';
 
 const Profile = (props) => {
 
@@ -265,23 +266,8 @@ const Profile = (props) => {
                         })
                     }
 
-                    <div style={{ width: "90%", margin: "0 auto" }}>
-                        <table id="userGameSummaries" className="table table-striped table-bordered dt-responsive nowrap" width="100%" cellSpacing="0">
-                            <thead>
-                                <tr>
-                                    <th>Id</th>
-                                    <th>GameId</th>
-                                    <th>GameName</th>
-                                    <th>Genre</th>
-                                    <th>Rate</th>
-                                    <th>Open</th>
-                                    <th>Delete</th>
-                                </tr>
-                            </thead>
-                        </table>
-                    </div>
                 </Tabs>               
-
+                <UserLibrary gameSummaries={pageState.data.gameSummaries} />
             </div>
         );
 }

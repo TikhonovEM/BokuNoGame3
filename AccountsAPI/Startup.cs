@@ -101,6 +101,7 @@ namespace Bng.AccountsAPI
                 });
 
             services.AddScoped<IAuthService, AuthService>();
+            services.AddSingleton<IUserLibraryService, UserLibraryScheme>();
 
             services.AddSwaggerGen(c =>
             {

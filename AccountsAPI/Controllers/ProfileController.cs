@@ -1,4 +1,5 @@
-﻿using Bng.AccountsAPI.Models;
+﻿using Bng.AccountsAPI.Helpers;
+using Bng.AccountsAPI.Models;
 using Bng.Shared.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -18,10 +19,12 @@ namespace Bng.AccountsAPI.Controllers
     public class ProfileController : ControllerBase
     {
         private readonly UserManager<User> _userManager;
+        private readonly IUserLibraryService _userLibraryService;
 
-        public ProfileController(UserManager<User> userManager)
+        public ProfileController(UserManager<User> userManager, IUserLibraryService userLibraryService)
         {
             _userManager = userManager;
+            _userLibraryService = userLibraryService;
         }
 
         [AllowAnonymous]
@@ -71,6 +74,14 @@ namespace Bng.AccountsAPI.Controllers
                 user.Nickname,
                 user.Photo
             };
+        }
+
+        [AllowAnonymous]
+        [HttpGet("LibraryScheme/{format?}")]
+        public object GetLibraryScheme(string format)
+        {
+            var scheme = _userLibraryService.GetLibraryScheme<GameSummary>(format);
+            return scheme;
         }
     }
 }
