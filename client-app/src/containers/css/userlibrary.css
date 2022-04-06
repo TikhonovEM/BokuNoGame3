@@ -1,0 +1,30 @@
+table {
+    border-spacing: 0;
+    border: 1px solid darkgray;
+    width: 100%;
+}
+
+table tr:last-child td {
+    border-bottom: 0;
+}
+
+table th, table td {
+    margin: 0;
+    padding: 0.5rem;
+    border-bottom: 1px solid darkgray;
+    border-right: 1px solid darkgray;
+    width: 1rem;
+}
+
+table th:last-child, table td:last-child {
+    margin: 0;
+    padding: 0.5rem;
+    border-bottom: 1px solid darkgray;
+    border-right: 1px solid darkgray;
+    border-right: 0;
+    width: 1rem;
+}
+
+.pagination {
+    padding: 0.5rem;
+}
