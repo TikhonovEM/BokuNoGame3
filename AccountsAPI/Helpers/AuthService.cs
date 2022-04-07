@@ -139,6 +139,7 @@ namespace Bng.AccountsAPI.Helpers
                 var roles = await _userManager.GetRolesAsync(user);
                 var claims = new List<Claim>
                 {
+                    new Claim(ClaimTypes.NameIdentifier, user.Id),
                     new Claim(ClaimsIdentity.DefaultNameClaimType, user.UserName),
                     new Claim(ClaimsIdentity.DefaultRoleClaimType, string.Join(", ", roles))
                 };

@@ -58,6 +58,18 @@ namespace Bng.AccountsAPI.Controllers
             };
         }
 
+        [HttpPost("Edit")]
+        public async Task<object> Edit([FromBody] User userPatch)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            user.Nickname = userPatch.Nickname;
+            user.FullName = userPatch.FullName;
+            user.Email = userPatch.Email;
+            user.BirthDate = userPatch.BirthDate;
+            await _userManager.UpdateAsync(user);
+            return Redirect(user.UserName);
+        }
+
         [AllowAnonymous]
         [HttpGet("UserInfo/{id?}")]
         public async Task<object> UserInfo(string id)

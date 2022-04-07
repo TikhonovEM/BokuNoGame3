@@ -1,9 +1,11 @@
 ﻿import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import userinfoService from '../services/userinfo.service';
-import api from '../services/api';
+import { Button, Modal, Form } from 'react-bootstrap';
 import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
 import 'react-tabs/style/react-tabs.css';
+
+import userinfoService from '../services/userinfo.service';
+import api from '../services/api';
 import UserLibrary from './userlibrary';
 
 const Profile = (props) => {
@@ -19,6 +21,13 @@ const Profile = (props) => {
     let [email, setEmail] = useState(null);
     let [birthDate, setBirthDate] = useState(null);
     let [gameSummariesToRender, setGameSummariesToRender] = useState([]);
+
+    const [show, setShow] = useState(false);
+
+    const handleClose = () => setShow(false);
+    const handleShow = () => setShow(true);
+
+    const userInfo = userinfoService.getInfo();
 
     
     useEffect(() => {
@@ -67,24 +76,28 @@ const Profile = (props) => {
 
     const submitHandler = (event) => {
         event.preventDefault();
-        fetch("/api/Account/EditProfile", {
+        console.log()
+        api.bng_accounts_fetch({
+            url: "/api/Profile/Edit",
             method: "POST",
-            body: JSON.stringify({
+            headers: {
+                Authorization: 'Bearer ' + userInfo.jwtToken,
+                'Content-Type': 'application/json'
+            },
+            data: JSON.stringify({
                 "nickname": nickname,
                 "fullName": fullName,
                 "email": email,
                 "birthDate": birthDate === "" ? null : birthDate
-            }),
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        }).then(response => {
-            if (response.status == 200) {
-                response.json().then(res => {
-                    alert("Профиль обновлен!");
-                    this.setState({
-                        data: res
-                    })
+            })
+        })
+        .then(res => {
+            if (res.status == 200) {
+                alert("Профиль обновлен!");
+                handleClose();
+                setPageState({
+                    data: res.data,
+                    isFetching: false
                 });
             }
         });
@@ -93,8 +106,7 @@ const Profile = (props) => {
     const filterGameSummaries = (catalogId) => {
         setGameSummariesToRender(pageState.data.gameSummaries.filter(gs => gs.catalogId == catalogId));
     }
-
-    const userInfo = userinfoService.getInfo();
+    
     if (pageState.isFetching)
         return <div>...Loading</div>;
     return (
@@ -199,12 +211,12 @@ const Profile = (props) => {
                     </div>
                     {(userInfo != null && userInfo.username === params.username) &&
                         <div className="col-md-2">
-                            <button type="button" className="btn btn-info w-100" data-toggle="modal" data-target="#exampleModal">
+                            <Button className="btn btn-info w-100" onClick={handleShow}>
                                 Изменить профиль
-                            </button>
-                            <button className="btn btn-info" onClick={exportLibraries}>
+                            </Button>
+                            <Button className="btn btn-info" onClick={exportLibraries}>
                                 Экспортировать библиотеку
-                            </button>
+                            </Button>
                             <form className="form-inline" method="post" encType="multipart/form-data" id="import-lib">
                                 <div className="import">
                                     <label>
@@ -213,50 +225,38 @@ const Profile = (props) => {
                                     </label>
                                 </div>
                             </form>
-                            <div className="modal fade" id="exampleModal" tabIndex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                                <div className="modal-dialog" role="document">
-                                    <div className="modal-content">
-                                        <div className="modal-header">
-                                            <h5 className="modal-title" id="exampleModalLabel">Данные профиля</h5>
-                                            <button type="button" className="close" data-dismiss="modal" aria-label="Close">
-                                                <span aria-hidden="true">&times;</span>
-                                            </button>
-                                        </div>
-                                        <form method="post">
-                                            <div className="modal-body">
-                                                <div className="form-group row">
-                                                    <label htmlFor="nickname" className="col-sm-4 col-form-label">Никнейм</label>
-                                                    <div className="col-sm-3">
-                                                        <input type="text" id="nickname" name="nickname" size="35" onInput={e => setNickname(e.target.value)} />
-                                                    </div>
-                                                </div>
-                                                <div className="form-group row">
-                                                    <label htmlFor="fullName" className="col-sm-4 col-form-label">Полное имя</label>
-                                                    <div className="col-sm-3">
-                                                        <input type="text" id="fullName" name="fullName" size="35" onInput={e => setFullName(e.target.value)} />
-                                                    </div>
-                                                </div>
-                                                <div className="form-group row">
-                                                    <label htmlFor="email" className="col-sm-4 col-form-label">Email</label>
-                                                    <div className="col-sm-3">
-                                                        <input type="email" id="email" name="email" size="35" onInput={e => setEmail(e.target.value)} />
-                                                    </div>
-                                                </div>
-                                                <div className="form-group row">
-                                                    <label htmlFor="birthDate" className="col-sm-4 col-form-label">Дата рождения</label>
-                                                    <div className="col-sm-3">
-                                                        <input type="date" id="birthDate" name="birthDate" onInput={e => setBirthDate(e.target.value)} />
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div className="modal-footer">
-                                                <button type="button" className="btn btn-secondary" data-dismiss="modal">Закрыть</button>
-                                                <button type="submit" className="btn btn-primary" data-dismiss="modal" onClick={submitHandler}>Обновить</button>
-                                            </div>
-                                        </form>
-                                    </div>
-                                </div>
-                            </div>
+                            <Modal
+                                show={show}
+                                onHide={handleClose}
+                                backdrop="static"
+                                keyboard={false}
+                            >
+                                <Modal.Header closeButton>
+                                    <Modal.Title>Данные профиля</Modal.Title>
+                                </Modal.Header>
+                                <Modal.Body>
+                                    <Form.Group className="row">
+                                        <Form.Label className="col-sm-4 col-form-label">Никнейм</Form.Label>
+                                        <Form.Control type="text" size="35" onInput={e => setNickname(e.target.value)}></Form.Control>
+                                    </Form.Group>
+                                    <Form.Group className="row">
+                                        <Form.Label className="col-sm-4 col-form-label">Полное имя</Form.Label>
+                                        <Form.Control type="text" size="35" onInput={e => setFullName(e.target.value)}></Form.Control>
+                                    </Form.Group>
+                                    <Form.Group className="row">
+                                        <Form.Label className="col-sm-4 col-form-label">Email</Form.Label>
+                                        <Form.Control type="email" size="35" onInput={e => setEmail(e.target.value)}></Form.Control>
+                                    </Form.Group>
+                                    <Form.Group className="row">
+                                        <Form.Label className="col-sm-4 col-form-label">Дата рождения</Form.Label>
+                                        <Form.Control type="date" size="35" onInput={e => setBirthDate(e.target.value)}></Form.Control>
+                                    </Form.Group>
+                                </Modal.Body>
+                                <Modal.Footer>
+                                    <Button variant='secondary' onClick={handleClose}>Закрыть</Button>
+                                    <Button variant='primary' onClick={submitHandler}>Обновить</Button>
+                                </Modal.Footer>
+                            </Modal>
                         </div>
                     }
                 </div>

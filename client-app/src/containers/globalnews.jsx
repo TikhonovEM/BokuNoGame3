@@ -88,8 +88,8 @@ const GlobalNews = (props) => {
                         </Form.Group>
                     </Modal.Body>
                     <Modal.Footer>
-                    <Button variant='secondary' onClick={handleClose}>Закрыть</Button>
-                    <Button variant='primary' onClick={e => submitHandler(e, false)}>Опубликовать</Button>
+                        <Button variant='secondary' onClick={handleClose}>Закрыть</Button>
+                        <Button variant='primary' onClick={e => submitHandler(e, false)}>Опубликовать</Button>
                     </Modal.Footer>
                 </Modal>
             </div>
