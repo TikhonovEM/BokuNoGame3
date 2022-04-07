@@ -2,6 +2,7 @@
 using Bng.GamesAPI.Domain;
 using Bng.GamesAPI.Extensions;
 using Bng.Shared.Models;
+using Bng.Shared.Extensions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;

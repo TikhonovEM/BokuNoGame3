@@ -25,7 +25,7 @@ const UserLibrary = (props) => {
     let data = useMemo(
         () => 
         props.gameSummaries,
-        []);
+        [props.gameSummaries]);
 
     let columns = useMemo(
         () => 
@@ -38,10 +38,7 @@ const UserLibrary = (props) => {
         getTableBodyProps,
         headerGroups,
         prepareRow,
-        page, // Instead of using 'rows', we'll use page,
-        // which has only the rows for the active page
-    
-        // The rest of these things are super handy, too ;)
+        page,
         canPreviousPage,
         canNextPage,
         pageOptions,
@@ -98,10 +95,6 @@ const UserLibrary = (props) => {
                     })}
                     </tbody>
                 </table>
-                {/* 
-                    Pagination can be built however you'd like. 
-                    This is just a very basic UI implementation:
-                */}
                 <div className="pagination">
                     <button onClick={() => gotoPage(0)} disabled={!canPreviousPage}>
                     {'<<'}

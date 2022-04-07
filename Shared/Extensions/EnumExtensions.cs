@@ -4,7 +4,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 
-namespace Bng.GamesAPI.Extensions
+namespace Bng.Shared.Extensions
 {
     public static class EnumExtensions
     {

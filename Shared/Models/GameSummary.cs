@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Bng.Shared.Extensions;
 
 namespace Bng.Shared.Models
 {
@@ -9,10 +10,10 @@ namespace Bng.Shared.Models
         [Display(Name = "Название")]
         public string GameName { get; set; }
         [Display(Name = "Ваша оценка")]
-        public int? Rate { get; set; }
-        [Display(Name = "Жанр")]
+        public int? Rate { get; set; }       
         public Genre Genre { get; set; }
-        public string GenreWrapper { get; set; }
+        [Display(Name = "Жанр")]
+        public string GenreWrapper { get => Genre.GetAttribute<DisplayAttribute>().Name; }
         public int GameId { get; set; }
         public Game Game { get; set; }
         public string UserId { get; set; }

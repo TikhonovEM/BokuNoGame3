@@ -18,6 +18,7 @@ const Profile = (props) => {
     let [fullName, setFullName] = useState(null);
     let [email, setEmail] = useState(null);
     let [birthDate, setBirthDate] = useState(null);
+    let [gameSummariesToRender, setGameSummariesToRender] = useState([]);
 
     
     useEffect(() => {
@@ -31,6 +32,12 @@ const Profile = (props) => {
                 isFetching: false
             }));
     }, []);
+
+    useEffect(() => {
+        if (pageState.data.gameSummaries) {
+            filterGameSummaries(2);
+        }
+    }, [pageState])
 
     const exportLibraries = (event) => {
         alert("Coming Soon...");
@@ -81,6 +88,10 @@ const Profile = (props) => {
                 });
             }
         });
+    }
+
+    const filterGameSummaries = (catalogId) => {
+        setGameSummariesToRender(pageState.data.gameSummaries.filter(gs => gs.catalogId == catalogId));
     }
 
     const userInfo = userinfoService.getInfo();
@@ -251,23 +262,23 @@ const Profile = (props) => {
                 </div>
 
                 <br />
-                <Tabs defaultIndex={1}>
+                <Tabs defaultIndex={1} onSelect={(index, lastIndex, event) => filterGameSummaries(index + 1)}>
                     <TabList>
                         {pageState.data.catalogs.map(function (value, index, array) {
-                            return (<Tab style={{minWidth: `${100 / array.length}%`}} key={index}>{value.name}</Tab>);
+                            return (<Tab style={{minWidth: `${100 / array.length}%`}} key={value.id}>{value.name}</Tab>);
                         })
                         }
                     </TabList>
 
                     {pageState.data.catalogs.map(function (value, index, array) {
                             return (
-                                <TabPanel key={index}></TabPanel>
+                                <TabPanel key={value.id}></TabPanel>
                             );
                         })
                     }
 
-                </Tabs>               
-                <UserLibrary gameSummaries={pageState.data.gameSummaries} />
+                </Tabs>
+                <UserLibrary gameSummaries={gameSummariesToRender} />
             </div>
         );
 }
