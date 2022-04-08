@@ -76,7 +76,6 @@ const Profile = (props) => {
 
     const submitHandler = (event) => {
         event.preventDefault();
-        console.log()
         api.bng_accounts_fetch({
             url: "/api/Profile/Edit",
             method: "POST",

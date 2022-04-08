@@ -1,7 +1,8 @@
 ﻿import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import api from '../../services/api';
-import Reviews from './reviews'
+import Reviews from './reviews';
+import UserLibraryInfo from './userlibraryinfo';
 
 const Game = (props) => {
 
@@ -70,6 +71,7 @@ const Game = (props) => {
                         </div>
                         <div className="description row">
                             <div className="col-md-4">
+                                <UserLibraryInfo game={gameState.game}/>
                             </div>
                             <div className="col-md-8">
                                 <h4 className="bg-secondary"><b>Описание:</b></h4>
