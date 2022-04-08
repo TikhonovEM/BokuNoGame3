@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Button, Modal, Form } from 'react-bootstrap';
-import api from '../services/api';
+import api from '../../services/api';
 
 const GlobalNews = (props) => {
     const [globalNews, setGlobalNews] = useState(

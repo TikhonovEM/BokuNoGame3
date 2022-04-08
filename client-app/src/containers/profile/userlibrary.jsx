@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { useTable, usePagination, useSortBy } from 'react-table';
-import api from '../services/api';
-import './css/userlibrary.css'
+import api from '../../services/api';
+import '../css/userlibrary.css';
 
 const UserLibrary = (props) => {
 

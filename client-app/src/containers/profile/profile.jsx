@@ -4,8 +4,8 @@ import { Button, Modal, Form } from 'react-bootstrap';
 import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
 import 'react-tabs/style/react-tabs.css';
 
-import userinfoService from '../services/userinfo.service';
-import api from '../services/api';
+import userinfoService from '../../services/userinfo.service';
+import api from '../../services/api';
 import UserLibrary from './userlibrary';
 
 const Profile = (props) => {

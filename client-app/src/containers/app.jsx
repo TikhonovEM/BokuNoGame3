@@ -1,13 +1,12 @@
 ﻿import React from 'react';
-import ReactDOM from 'react-dom';
 import { BrowserRouter as Router, Route, Switch, Routes } from 'react-router-dom';
 import Header from './header.jsx';
 import GameList from './gamelist.jsx';
-import MainPage from './main.jsx';
-import Game from './game.jsx';
+import MainPage from './main/main.jsx';
+import Game from './game/game.jsx';
 import Login from './login.jsx'
 import Register from './register.jsx'
-import Profile from './profile.jsx'
+import Profile from './profile/profile.jsx'
 import 'bootstrap-dark-5/dist/css/bootstrap-dark.min.css'
 
 const App = (props) => {

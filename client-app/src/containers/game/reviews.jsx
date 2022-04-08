@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import api from '../services/api';
-import userinfoService from '../services/userinfo.service';
-import './css/review.css';
+import api from '../../services/api';
+import userinfoService from '../../services/userinfo.service';
+import '../css/review.css';
 
 const Reviews = (props) => {
     let [reviewsState, setReviewsState] = useState(
@@ -18,6 +18,7 @@ const Reviews = (props) => {
     let [reviewText, setReviewText] = useState(""); 
     
     useEffect(() => {
+            console.log("started");
             api.bng_games_fetch({
                 url: `/api/Review/Query?$filter=gameid eq ${props.gameId} and isapproved eq true`,
                 method: 'GET'
@@ -26,12 +27,14 @@ const Reviews = (props) => {
                 reviews: res.data,
                 isFetching: false
             }));
+            console.log("finished");
         }, []);
 
     useEffect(() => {
         if (Object.keys(reviewsState.reviews).length !== 0 && reviewsState.reviews.constructor !== Object) {   
             let userInfos = {};
             reviewsState.reviews.map(function (review, i, arr) {
+                console.log("userinfo started");
                 api.bng_accounts_fetch({
                     url: 'api/Profile/UserInfo/' + review.userId,
                     method: 'GET'
@@ -45,6 +48,7 @@ const Reviews = (props) => {
                         });
                     }
                 });
+                console.log("userinfo finished");
             })
         }
     }, [reviewsState]);

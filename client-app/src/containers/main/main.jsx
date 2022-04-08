@@ -1,6 +1,4 @@
 ﻿import React from 'react';
-import ReactDOM from 'react-dom';
-import { NavLink } from 'react-router-dom';
 import GlobalNews from './globalnews';
 import LocalNews from './localnews';
 import TopGames from './topgames';
