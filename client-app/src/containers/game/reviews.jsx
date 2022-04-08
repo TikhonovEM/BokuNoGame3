@@ -18,7 +18,6 @@ const Reviews = (props) => {
     let [reviewText, setReviewText] = useState(""); 
     
     useEffect(() => {
-            console.log("started");
             api.bng_games_fetch({
                 url: `/api/Review/Query?$filter=gameid eq ${props.gameId} and isapproved eq true`,
                 method: 'GET'
@@ -27,14 +26,12 @@ const Reviews = (props) => {
                 reviews: res.data,
                 isFetching: false
             }));
-            console.log("finished");
         }, []);
 
     useEffect(() => {
-        if (Object.keys(reviewsState.reviews).length !== 0 && reviewsState.reviews.constructor !== Object) {   
-            let userInfos = {};
+        let userInfos = {};
+        if (Object.keys(reviewsState.reviews).length !== 0 && reviewsState.reviews.constructor !== Object) {           
             reviewsState.reviews.map(function (review, i, arr) {
-                console.log("userinfo started");
                 api.bng_accounts_fetch({
                     url: 'api/Profile/UserInfo/' + review.userId,
                     method: 'GET'
@@ -48,8 +45,15 @@ const Reviews = (props) => {
                         });
                     }
                 });
-                console.log("userinfo finished");
             })
+        }
+        else {
+            if (Object.keys(userInfos).length === reviewsState.reviews.length) {
+                setUserInfoState({
+                    data: userInfos,
+                    isFetching: false
+                });
+            }
         }
     }, [reviewsState]);
 
