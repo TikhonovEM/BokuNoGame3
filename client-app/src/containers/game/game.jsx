@@ -1,6 +1,8 @@
 ﻿import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import api from '../../services/api';
+import userinfoService from '../../services/userinfo.service';
+import UserGameRate from './usergamerate';
 import Reviews from './reviews';
 import UserLibraryInfo from './userlibraryinfo';
 
@@ -24,6 +26,8 @@ const Game = (props) => {
             isFetching: false
         }));
     }, []);
+
+    const userInfo = userinfoService.getInfo();
 
     if (gameState.isFetching)
         return <div>...Loading</div>;
@@ -70,8 +74,13 @@ const Game = (props) => {
                             </div>
                         </div>
                         <div className="description row">
-                            <div className="col-md-4">
-                                <UserLibraryInfo game={gameState.game}/>
+                            <div className="col-md-4">                                
+                                {userInfo &&
+                                    <section>
+                                        <UserLibraryInfo game={gameState.game}/>
+                                        <UserGameRate gameId={params.gameId}/>
+                                    </section>
+                                }                                
                             </div>
                             <div className="col-md-8">
                                 <h4 className="bg-secondary"><b>Описание:</b></h4>
