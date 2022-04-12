@@ -5,6 +5,7 @@ import userinfoService from '../../services/userinfo.service';
 import UserGameRate from './usergamerate';
 import Reviews from './reviews';
 import UserLibraryInfo from './userlibraryinfo';
+import AverageGameRate from './averagegamerate';
 
 const Game = (props) => {
 
@@ -63,14 +64,7 @@ const Game = (props) => {
                         <div className="rating col-md-4">
                             <h4 className="bg-secondary"><b>Рейтинг:</b></h4>
                             <div className="row">
-                                <div className="col-md-5">
-                                    <div className="rateit ml-3 mt-1"
-                                        data-rateit-value="5"//TODO FIX STUB {gameState.data.rate.currentRateStr}
-                                        data-rateit-step="0.01"
-                                        data-rateit-readonly="true"
-                                        data-rateit-mode="font" style={{ fontSize: "40px" }}></div>
-                                </div>
-                                <div className="col-md-7" style={{ fontSize: "35px" }}>10</div>
+                                <AverageGameRate gameId={params.gameId} />
                             </div>
                         </div>
                         <div className="description row">

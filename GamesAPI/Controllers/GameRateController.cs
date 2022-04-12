@@ -12,6 +12,23 @@ namespace Bng.GamesAPI.Controllers
     [ApiController]
     public class GameRateController : BaseCRUDController<GameRateController, GameRate>
     {
+
+        /// <summary>
+        /// Получить средний рейтинг игры.
+        /// </summary>
+        /// <param name="gameId">ИД игры.</param>
+        /// <returns></returns>
+        /// <remarks>Вынесен в отдельный метод, т.к. aggregate из OData не работает в EF Core ниже 6 версии, а EF Core 6 несовместим с .net5.</remarks>
+        [HttpGet("Average/{gameId}")]
+        public virtual async Task<double> GetAverageRate(int gameId)
+        {
+            var rates = Context.GameRates.Where(gr => gr.GameId == gameId).Select(gr => gr.Rate);
+            if (rates.Count() > 0)
+                return Math.Round(await rates.AverageAsync(), 2);
+
+            return 0;
+        }
+
         public override async Task<IActionResult> Put(int id, [FromBody] GameRate model)
         {
             var result = await base.Put(id, model);
