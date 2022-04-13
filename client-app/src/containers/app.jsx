@@ -4,10 +4,12 @@ import Header from './header.jsx';
 import GameList from './gamelist.jsx';
 import MainPage from './main/main.jsx';
 import Game from './game/game.jsx';
-import Login from './login.jsx'
-import Register from './register.jsx'
-import Profile from './profile/profile.jsx'
-import 'bootstrap-dark-5/dist/css/bootstrap-dark.min.css'
+import Login from './login.jsx';
+import Register from './register.jsx';
+import Profile from './profile/profile.jsx';
+import AdminMainPage from './admin/adminmainpage.jsx';
+import ReviewCheckPage from './admin/reviewcheckpage.jsx';
+import 'bootstrap-dark-5/dist/css/bootstrap-dark.min.css';
 
 const App = (props) => {
     return (
@@ -22,6 +24,8 @@ const App = (props) => {
                         <Route path='/GameList' element={<GameList />} ></Route>
                         <Route path='/Game/:gameId' element={<Game />} ></Route>
                         <Route path='/Profile/:username' element={<Profile />} ></Route>
+                        <Route path='/Admin' element={<AdminMainPage />} ></Route>
+                        <Route path='/Admin/Reviews' element={<ReviewCheckPage />} ></Route>
                     </Routes>
                 </main>                   
             </div>

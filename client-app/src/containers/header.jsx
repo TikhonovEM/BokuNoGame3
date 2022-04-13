@@ -27,7 +27,7 @@ const Header = (props) => {
                                     {
                                         userInfo.roles.split(", ").includes("Admin") &&
                                         <li className="nav-item">
-                                            <NavLink to="/" className="nav-link text-info">Администрирование</NavLink>
+                                            <NavLink to="/Admin" className="nav-link text-info">Администрирование</NavLink>
                                         </li>
                                     }
                                     <li className="nav-item">
