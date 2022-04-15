@@ -1,5 +1,5 @@
 ﻿import React, { useState } from 'react';
-import { NavLink, Navigate } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import './css/login.css';
 import api from '../services/api';
 
@@ -7,20 +7,16 @@ const Login = (props) => {
     let [login, setLogin] = useState(null);
     let [password, setPassword] = useState(null);
     let [rememberMe, setRememberMe] = useState(false);
-    let [redirect, setRedirect] = useState(false);
+    let navigate = useNavigate();
 
     const submitHandler = async (event) => {
         event.preventDefault();
         let result = await api.login(login, password, rememberMe);
         if (result.successful) {
-            setRedirect(true);
+            navigate("/", { replace: true });
         }
     }
 
-    if (redirect) {
-        document.location = '/';
-        //return (<Navigate to='/' replace={true} />);
-    }
     return (
         <div id="logreg-forms">
             <div className="card rounded-0">

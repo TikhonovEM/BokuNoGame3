@@ -1,5 +1,5 @@
-﻿import React from 'react';
-import { BrowserRouter as Router, Route, Switch, Routes } from 'react-router-dom';
+﻿import React, { useEffect } from 'react';
+import { Route, Routes } from 'react-router-dom';
 import Header from './header.jsx';
 import GameList from './gamelist.jsx';
 import MainPage from './main/main.jsx';
@@ -9,9 +9,19 @@ import Register from './register.jsx';
 import Profile from './profile/profile.jsx';
 import AdminMainPage from './admin/adminmainpage.jsx';
 import ReviewCheckPage from './admin/reviewcheckpage.jsx';
+import userinfoService from '../services/userinfo.service.js';
+import api from '../services/api';
 import 'bootstrap-dark-5/dist/css/bootstrap-dark.min.css';
 
 const App = (props) => {
+
+    useEffect(async () => {
+        const payload = userinfoService.getTokenPayload();
+        if (payload !== null) {
+            await api.refreshToken();
+        }
+    }, [])
+
     return (
         <div>
             <Header />

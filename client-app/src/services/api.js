@@ -32,12 +32,15 @@ class Api {
     }
     
     async refreshToken() {
+        console.log("api. refreshing token");
         const data = {            
             token: userinfoService.getInfo().refreshToken
         };
         let response = await axios.post(config.Addressees.AccountsAPI + "/api/auth/refresh-token", data);
+        console.log("api. refresh token status =", response.status);
 
         if (response.status == 200) {
+            userinfoService.saveInfo(response.data);
             this._startRefreshTokenTimer();
         }
         else {
@@ -82,11 +85,9 @@ class Api {
                 Authorization: 'Bearer ' + userInfo.jwtToken
             }
         }
-        let response = await axios.post(config.Addressees.AccountsAPI + "/api/auth/revoke-token", data, axios_config);
-        if (response.status == 200) {
-            userinfoService.deleteInfo();
-            this._stopRefreshTokenTimer();
-        }
+        await axios.post(config.Addressees.AccountsAPI + "/api/auth/revoke-token", data, axios_config);
+        userinfoService.deleteInfo();
+        this._stopRefreshTokenTimer();
     }
 
     bng_games_fetch(opts) {
@@ -102,15 +103,22 @@ class Api {
     _refreshTokenTimeout;
 
     _startRefreshTokenTimer() {
+
+        if (this._refreshTokenTimeout)
+            this._stopRefreshTokenTimer();
+
         const jwtTokenPayload = userinfoService.getTokenPayload();
         // set a timeout to refresh the token a minute before it expires
         const expires = new Date(jwtTokenPayload.exp * 1000);
         const timeout = expires.getTime() - Date.now() - (60 * 1000);
 
+        console.log("api. Starting timeout. ms =", timeout);
+
         this._refreshTokenTimeout = setTimeout(() => this.refreshToken(), timeout);
     }
 
     _stopRefreshTokenTimer() {
+        console.log("api. Stopping timeout");
         clearTimeout(this._refreshTokenTimeout);
     }
 }

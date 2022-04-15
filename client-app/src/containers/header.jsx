@@ -1,13 +1,15 @@
 ﻿import React, { useState } from 'react';
 import ReactDOM from 'react-dom';
-import { BrowserRouter as Router, Route, Switch, NavLink } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Switch, NavLink, useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import userinfoService from '../services/userinfo.service';
 
 const Header = (props) => {
+
+    let navigate = useNavigate();
     const logout = async () => {
         await api.logout();
-        document.location = '/';
+        navigate("/", { replace: true });
     }
 
     const userInfo = userinfoService.getInfo();
